@@ -1,0 +1,23 @@
+{
+  "extName": { "message": "YouTube Subtitle Downloader" },
+  "extDescription": { "message": "Скачивайте и переводите субтитры YouTube в один клик." },
+  "panelTitle": { "message": "Субтитры" },
+  "downloadButton": { "message": "Скачать" },
+  "copyButton": { "message": "Копировать" },
+  "copiedStatus": { "message": "Скопировано!" },
+  "translateButton": { "message": "Перевести и скачать" },
+  "languageLabel": { "message": "Исходный язык" },
+  "targetLanguageLabel": { "message": "Перевести на" },
+  "modeLabel": { "message": "Режим" },
+  "modeTranslationOnly": { "message": "Только перевод" },
+  "modeBilingual": { "message": "Оригинал + перевод" },
+  "formatLabel": { "message": "Формат" },
+  "signInButton": { "message": "Войти через Google" },
+  "signedInAs": { "message": "Вы вошли как $EMAIL$", "placeholders": { "email": { "content": "$1" } } },
+  "noSubtitles": { "message": "Для этого видео нет субтитров" },
+  "loading": { "message": "Загрузка..." },
+  "translating": { "message": "Перевод..." },
+  "error": { "message": "Что-то пошло не так" },
+  "reviewToastText": { "message": "Нравится расширение?" },
+  "reviewToastAction": { "message": "Оцените ★★★★★ в Chrome Web Store" }
+}

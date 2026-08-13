@@ -1,0 +1,23 @@
+{
+  "extName": { "message": "YouTube Subtitle Downloader" },
+  "extDescription": { "message": "Download and translate YouTube subtitles in one click." },
+  "panelTitle": { "message": "Subtitles" },
+  "downloadButton": { "message": "Download" },
+  "copyButton": { "message": "Copy" },
+  "copiedStatus": { "message": "Copied!" },
+  "translateButton": { "message": "Translate & download" },
+  "languageLabel": { "message": "Original language" },
+  "targetLanguageLabel": { "message": "Translate to" },
+  "modeLabel": { "message": "Mode" },
+  "modeTranslationOnly": { "message": "Translation only" },
+  "modeBilingual": { "message": "Original + translation" },
+  "formatLabel": { "message": "Format" },
+  "signInButton": { "message": "Sign in with Google" },
+  "signedInAs": { "message": "Signed in as $EMAIL$", "placeholders": { "email": { "content": "$1" } } },
+  "noSubtitles": { "message": "No subtitles available for this video" },
+  "loading": { "message": "Loading..." },
+  "translating": { "message": "Translating..." },
+  "error": { "message": "Something went wrong" },
+  "reviewToastText": { "message": "Enjoying the extension?" },
+  "reviewToastAction": { "message": "Rate ★★★★★ on Chrome Web Store" }
+}
