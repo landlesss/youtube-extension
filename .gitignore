@@ -4,3 +4,6 @@ dist/
 .env.local
 *.log
 .DS_Store
+extension_key.pem
+*.zip
+icons_old_backup/

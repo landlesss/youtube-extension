@@ -1,17 +1,11 @@
 import { cleanupCues, fetchCaptionTracks, getVideoId, serializeCues } from "../lib/youtube";
 import { fetchCuesFromPanel } from "../lib/transcriptPanel";
 import { downloadTextFile } from "../lib/download";
-import { getSession, login, translateCues } from "../lib/api";
+import { claimVideoAccess, getMe, getSession, login, translateAllCues } from "../lib/api";
+import { t } from "../lib/i18n";
 import { recordDownloadAndMaybeShowReviewPrompt } from "../lib/reviewPrompt";
 import { SubtitlePanel } from "./ui";
-import type { CaptionTrack, Cue, SubtitleFormat, TranslationMode } from "../types";
-
-function toBilingualCues(original: Cue[], translated: Cue[]): Cue[] {
-  return original.map((cue, i) => ({
-    ...cue,
-    text: translated[i] ? `${cue.text}\n${translated[i].text}` : cue.text,
-  }));
-}
+import type { CaptionTrack, Cue, Quota, Session, SubtitleFormat } from "../types";
 
 let panel: SubtitlePanel | null = null;
 let loadedVideoId: string | null = null;
@@ -29,37 +23,54 @@ async function notifyDownloadCompleted(): Promise<void> {
   if (shouldShowReviewPrompt) ensurePanel().showReviewToast();
 }
 
+async function getCleanCues(track: CaptionTrack): Promise<Cue[]> {
+  return cleanupCues(await fetchCuesFromPanel(track));
+}
+
+// Claims today's per-video slot on the backend. Every download/copy/translate
+// action must call this first — it's what the backend uses to enforce the
+// daily video quota, and it requires a signed-in session (unlike just
+// previewing the transcript, which stays available while signed out).
+async function requireVideoAccess(): Promise<{ videoId: string; session: Session; quota: Quota }> {
+  const session = await getSession();
+  if (!session) throw new Error(t("notSignedInError"));
+  const videoId = getVideoId(location.href);
+  if (!videoId) throw new Error(t("error"));
+  const quota = await claimVideoAccess(videoId, session);
+  return { videoId, session, quota };
+}
+
 function ensurePanel(): SubtitlePanel {
   if (panel) return panel;
   panel = new SubtitlePanel({
-    onDownloadOriginal: async (track: CaptionTrack, format: SubtitleFormat) => {
-      const cues = cleanupCues(await fetchCuesFromPanel(track));
+    onDownload: async (cues: Cue[], format: SubtitleFormat, suffix: string) => {
+      const { quota } = await requireVideoAccess();
+      ensurePanel().updateQuota(quota);
       const content = serializeCues(cues, format);
-      downloadTextFile(`${sanitizeFilename(getPageTitle())}.${track.languageCode}.${format}`, content);
-      void notifyDownloadCompleted();
-    },
-    onCopyOriginal: async (track: CaptionTrack, format: SubtitleFormat) => {
-      const cues = cleanupCues(await fetchCuesFromPanel(track));
-      const content = serializeCues(cues, format);
-      await navigator.clipboard.writeText(content);
-    },
-    onTranslateAndDownload: async (
-      track: CaptionTrack,
-      targetLang: string,
-      format: SubtitleFormat,
-      mode: TranslationMode,
-    ) => {
-      const session = await getSession();
-      if (!session) throw new Error("Not signed in");
-      const cues = cleanupCues(await fetchCuesFromPanel(track));
-      const translated = await translateCues(cues, track.languageCode, targetLang, session);
-      const finalCues = mode === "bilingual" ? toBilingualCues(cues, translated) : translated;
-      const content = serializeCues(finalCues, format);
-      const suffix =
-        mode === "bilingual" ? `${track.languageCode}-${targetLang.toLowerCase()}.bilingual` : targetLang.toLowerCase();
       downloadTextFile(`${sanitizeFilename(getPageTitle())}.${suffix}.${format}`, content);
       void notifyDownloadCompleted();
     },
+    onCopy: async (cues: Cue[], format: SubtitleFormat) => {
+      const { quota } = await requireVideoAccess();
+      ensurePanel().updateQuota(quota);
+      const content = serializeCues(cues, format);
+      await navigator.clipboard.writeText(content);
+    },
+    onTranslate: async (track: CaptionTrack, targetLang: string) => {
+      const { videoId, session, quota } = await requireVideoAccess();
+      ensurePanel().updateQuota(quota);
+      const cues = await getCleanCues(track);
+      const { cues: translated, quota: translateQuota } = await translateAllCues(
+        videoId,
+        cues,
+        track.languageCode,
+        targetLang,
+        session,
+      );
+      ensurePanel().updateQuota(translateQuota);
+      return { original: cues, translated };
+    },
+    onLoadTranscript: async (track: CaptionTrack) => getCleanCues(track),
     onLogin: async () => login(),
     onToggle: (nextOpen) => {
       if (nextOpen) void loadTracksIfNeeded();
@@ -81,11 +92,12 @@ async function loadTracksIfNeeded(): Promise<void> {
   try {
     const tracks = await fetchCaptionTracks(videoId);
     const session = await getSession();
+    const quota = session ? await getMe(session).catch(() => null) : null;
     loadedVideoId = videoId;
     if (tracks.length === 0) {
       p.renderEmpty();
     } else {
-      p.renderTracks(tracks, session);
+      p.renderTracks(tracks, session, quota);
     }
   } catch {
     p.renderEmpty();
@@ -102,6 +114,15 @@ chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
 
 document.addEventListener("yt-navigate-finish", () => {
   loadedVideoId = null;
+  // YouTube is a single-page app: navigating from a non-video page (home,
+  // search results) into a video via its own router does NOT re-run content
+  // scripts, only fires this event. If the extension first loaded on a
+  // non-video page, `panel` was never created (see the bottom of this file),
+  // so the FAB never appeared — confirmed via Playwright: SPA nav into a
+  // video left #yt-subs-downloader-host absent, while a full reload of the
+  // same URL created it. Ensuring the panel here (not just updating an
+  // existing one) fixes that.
+  if (getVideoId(location.href)) ensurePanel();
   if (panel?.isOpen()) void loadTracksIfNeeded();
 });
 

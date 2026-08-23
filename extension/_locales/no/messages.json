@@ -1,0 +1,360 @@
+{
+  "extName": {
+    "message": "Last ned YouTube-undertekster"
+  },
+  "extDescription": {
+    "message": "Last ned og oversett YouTube-undertekster umiddelbart. Støtter 100+ språk."
+  },
+  "panelTitle": {
+    "message": "Undertekster"
+  },
+  "closeButton": {
+    "message": "Lukk"
+  },
+  "downloadButton": {
+    "message": "Last ned"
+  },
+  "copyButton": {
+    "message": "Kopier"
+  },
+  "copiedStatus": {
+    "message": "Kopiert!"
+  },
+  "translateButton": {
+    "message": "Oversett"
+  },
+  "languageLabel": {
+    "message": "Originalspråk"
+  },
+  "targetLanguageLabel": {
+    "message": "Oversett til"
+  },
+  "modeLabel": {
+    "message": "Modus"
+  },
+  "modeTranslationOnly": {
+    "message": "Bare oversettelse"
+  },
+  "modeBilingual": {
+    "message": "Original + oversettelse"
+  },
+  "formatLabel": {
+    "message": "Format"
+  },
+  "formatHint": {
+    "message": "Velg filformat for undertekster"
+  },
+  "downloadButtonHint": {
+    "message": "Last ned undertekster som fil"
+  },
+  "copyButtonHint": {
+    "message": "Kopier undertekster til utklippstavlen"
+  },
+  "translateButtonHint": {
+    "message": "Oversett undertekster til et annet språk"
+  },
+  "sameLanguageHint": {
+    "message": "Velg et annet målspråk — dette er allerede originalspråket"
+  },
+  "translationActiveLine": {
+    "message": "Nedlasting og kopiering bruker nå oversettelsen til $LANG$",
+    "placeholders": {
+      "lang": {
+        "content": "$1"
+      }
+    }
+  },
+  "signInButton": {
+    "message": "Logg inn med Google"
+  },
+  "signedInAs": {
+    "message": "Innlogget som $EMAIL$",
+    "placeholders": {
+      "email": {
+        "content": "$1"
+      }
+    }
+  },
+  "noSubtitles": {
+    "message": "Ingen undertekster tilgjengelig for denne videoen"
+  },
+  "loading": {
+    "message": "Laster..."
+  },
+  "translating": {
+    "message": "Oversetter..."
+  },
+  "error": {
+    "message": "Noe gikk galt"
+  },
+  "notSignedInError": {
+    "message": "Ikke innlogget"
+  },
+  "signInRequiredNotice": {
+    "message": "Logg inn med Google for å laste ned eller kopiere undertekster."
+  },
+  "sessionExpiredError": {
+    "message": "Økten din har utløpt — logg inn på nytt"
+  },
+  "authFailedError": {
+    "message": "Kunne ikke logge inn med Google, prøv igjen"
+  },
+  "bannedError": {
+    "message": "Denne kontoen er blokkert"
+  },
+  "emailConflictError": {
+    "message": "Denne e-posten er allerede i bruk"
+  },
+  "videoQuotaError": {
+    "message": "Daglig videogrense nådd. Tilbakestilles kl. $TIME$",
+    "placeholders": {
+      "time": {
+        "content": "$1"
+      }
+    }
+  },
+  "charCapError": {
+    "message": "Oversettelsesgrensen er nådd"
+  },
+  "rateLimitedError": {
+    "message": "For mange forespørsler — vent litt og prøv igjen"
+  },
+  "llmFailedError": {
+    "message": "Oversettelse er midlertidig utilgjengelig"
+  },
+  "notReadyError": {
+    "message": "Tjenesten er midlertidig utilgjengelig — prøv igjen snart"
+  },
+  "translationBusyError": {
+    "message": "Oversetter fortsatt — vennligst vent"
+  },
+  "quotaFreeLine": {
+    "message": "Gratisplan: $REMAINING$ videoer igjen i dag",
+    "placeholders": {
+      "remaining": {
+        "content": "$1"
+      }
+    }
+  },
+  "quotaProLine": {
+    "message": "Pro-plan: ubegrenset"
+  },
+  "reviewToastText": {
+    "message": "Liker du utvidelsen?"
+  },
+  "reviewToastRateLabel": {
+    "message": "Gi $STARS$ stjerner",
+    "placeholders": {
+      "stars": {
+        "content": "$1"
+      }
+    }
+  },
+  "welcomeTitle": {
+    "message": "Velkommen til YouTube Subtitle Downloader"
+  },
+  "welcomeSubtitle": {
+    "message": "Last ned, kopier og oversett YouTube-undertekster med ett klikk."
+  },
+  "welcomeStep1": {
+    "message": "Åpne en hvilken som helst video på YouTube."
+  },
+  "welcomeStep2": {
+    "message": "Klikk på den runde «CC»-knappen øverst til høyre på siden."
+  },
+  "welcomeStep3": {
+    "message": "Velg språk og format — SRT, VTT eller TXT."
+  },
+  "welcomeStep4": {
+    "message": "Last ned filen, eller kopier teksten direkte til utklippstavlen."
+  },
+  "welcomeTranslateTitle": {
+    "message": "Trenger du en oversettelse?"
+  },
+  "welcomeTranslateText": {
+    "message": "Logg inn med Google i panelet for å oversette undertekster til et annet språk — enten bare oversettelse, eller tospråklig med original + oversettelse på hver linje."
+  },
+  "welcomeCta": {
+    "message": "Åpne YouTube"
+  },
+  "langName_EN": {
+    "message": "Engelsk"
+  },
+  "langName_ES": {
+    "message": "Spansk"
+  },
+  "langName_RU": {
+    "message": "Russisk"
+  },
+  "langName_PT": {
+    "message": "Portugisisk"
+  },
+  "langName_HI": {
+    "message": "Hindi"
+  },
+  "langName_DE": {
+    "message": "Tysk"
+  },
+  "langName_FR": {
+    "message": "Fransk"
+  },
+  "langName_JA": {
+    "message": "Japansk"
+  },
+  "langName_KO": {
+    "message": "Koreansk"
+  },
+  "langName_AR": {
+    "message": "Arabisk"
+  },
+  "langName_ZH": {
+    "message": "Kinesisk (mandarin)"
+  },
+  "langName_YUE": {
+    "message": "Kantonesisk"
+  },
+  "langName_ID": {
+    "message": "Indonesisk"
+  },
+  "langName_TR": {
+    "message": "Tyrkisk"
+  },
+  "langName_VI": {
+    "message": "Vietnamesisk"
+  },
+  "langName_TH": {
+    "message": "Thai"
+  },
+  "langName_FIL": {
+    "message": "Filippinsk"
+  },
+  "langName_BN": {
+    "message": "Bengalsk"
+  },
+  "langName_TE": {
+    "message": "Telugu"
+  },
+  "langName_MR": {
+    "message": "Marathi"
+  },
+  "langName_TA": {
+    "message": "Tamilsk"
+  },
+  "langName_UR": {
+    "message": "Urdu"
+  },
+  "langName_FA": {
+    "message": "Persisk"
+  },
+  "langName_HE": {
+    "message": "Hebraisk"
+  },
+  "langName_MS": {
+    "message": "Malayisk"
+  },
+  "langName_IT": {
+    "message": "Italiensk"
+  },
+  "langName_PL": {
+    "message": "Polsk"
+  },
+  "langName_NL": {
+    "message": "Nederlandsk"
+  },
+  "langName_SV": {
+    "message": "Svensk"
+  },
+  "langName_NO": {
+    "message": "Norsk"
+  },
+  "langName_DA": {
+    "message": "Dansk"
+  },
+  "langName_FI": {
+    "message": "Finsk"
+  },
+  "langName_CS": {
+    "message": "Tsjekkisk"
+  },
+  "langName_RO": {
+    "message": "Rumensk"
+  },
+  "langName_HU": {
+    "message": "Ungarsk"
+  },
+  "langName_UK": {
+    "message": "Ukrainsk"
+  },
+  "langName_EL": {
+    "message": "Gresk"
+  },
+  "langName_BG": {
+    "message": "Bulgarsk"
+  },
+  "langName_HR": {
+    "message": "Kroatisk"
+  },
+  "langName_SR": {
+    "message": "Serbisk"
+  },
+  "langName_SK": {
+    "message": "Slovakisk"
+  },
+  "langName_LT": {
+    "message": "Litauisk"
+  },
+  "langName_LV": {
+    "message": "Latvisk"
+  },
+  "langName_ET": {
+    "message": "Estisk"
+  },
+  "langName_CA": {
+    "message": "Katalansk"
+  },
+  "langName_KK": {
+    "message": "Kasakhisk"
+  },
+  "langName_UZ": {
+    "message": "Usbekisk"
+  },
+  "langName_AZ": {
+    "message": "Aserbajdsjansk"
+  },
+  "langName_KA": {
+    "message": "Georgisk"
+  },
+  "langName_HY": {
+    "message": "Armensk"
+  },
+  "langName_SW": {
+    "message": "Swahili"
+  },
+  "langName_AF": {
+    "message": "Afrikaans"
+  },
+  "langName_PA": {
+    "message": "Panjabi"
+  },
+  "langName_GU": {
+    "message": "Gujarati"
+  },
+  "langName_KN": {
+    "message": "Kannada"
+  },
+  "langName_ML": {
+    "message": "Malayalam"
+  },
+  "langName_SI": {
+    "message": "Singalesisk"
+  },
+  "langName_KM": {
+    "message": "Khmer"
+  },
+  "langName_MY": {
+    "message": "Burmesisk"
+  },
+  "langName_IS": {
+    "message": "Islandsk"
+  }
+}

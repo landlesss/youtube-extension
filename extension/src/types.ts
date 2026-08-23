@@ -19,3 +19,30 @@ export interface Session {
   token: string;
   email: string;
 }
+
+export type Plan = "free" | "pro";
+
+export interface Quota {
+  plan: Plan;
+  remaining: number | null;
+  resetAt: string;
+  billingEnabled: boolean;
+  charsUsedMonth: number;
+  charsLimitMonth: number;
+}
+
+export type ApiErrorCode =
+  | "unauthorized"
+  | "auth_failed"
+  | "banned"
+  | "access_required"
+  | "email_conflict"
+  | "translation_in_progress"
+  | "conflict"
+  | "validation"
+  | "video_quota"
+  | "char_cap"
+  | "rate_limited"
+  | "llm_failed"
+  | "not_ready"
+  | "unknown";

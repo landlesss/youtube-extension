@@ -1,23 +1,360 @@
 {
-  "extName": { "message": "YouTube Subtitle Downloader" },
-  "extDescription": { "message": "Скачивайте и переводите субтитры YouTube в один клик." },
-  "panelTitle": { "message": "Субтитры" },
-  "downloadButton": { "message": "Скачать" },
-  "copyButton": { "message": "Копировать" },
-  "copiedStatus": { "message": "Скопировано!" },
-  "translateButton": { "message": "Перевести и скачать" },
-  "languageLabel": { "message": "Исходный язык" },
-  "targetLanguageLabel": { "message": "Перевести на" },
-  "modeLabel": { "message": "Режим" },
-  "modeTranslationOnly": { "message": "Только перевод" },
-  "modeBilingual": { "message": "Оригинал + перевод" },
-  "formatLabel": { "message": "Формат" },
-  "signInButton": { "message": "Войти через Google" },
-  "signedInAs": { "message": "Вы вошли как $EMAIL$", "placeholders": { "email": { "content": "$1" } } },
-  "noSubtitles": { "message": "Для этого видео нет субтитров" },
-  "loading": { "message": "Загрузка..." },
-  "translating": { "message": "Перевод..." },
-  "error": { "message": "Что-то пошло не так" },
-  "reviewToastText": { "message": "Нравится расширение?" },
-  "reviewToastAction": { "message": "Оцените ★★★★★ в Chrome Web Store" }
+  "extName": {
+    "message": "Скачать субтитры с YouTube"
+  },
+  "extDescription": {
+    "message": "Скачивайте и переводите субтитры YouTube мгновенно. Поддержка 100+ языков."
+  },
+  "panelTitle": {
+    "message": "Субтитры"
+  },
+  "closeButton": {
+    "message": "Закрыть"
+  },
+  "downloadButton": {
+    "message": "Скачать"
+  },
+  "copyButton": {
+    "message": "Копировать"
+  },
+  "copiedStatus": {
+    "message": "Скопировано!"
+  },
+  "translateButton": {
+    "message": "Перевести"
+  },
+  "languageLabel": {
+    "message": "Исходный язык"
+  },
+  "targetLanguageLabel": {
+    "message": "Перевести на"
+  },
+  "modeLabel": {
+    "message": "Режим"
+  },
+  "modeTranslationOnly": {
+    "message": "Только перевод"
+  },
+  "modeBilingual": {
+    "message": "Оригинал + перевод"
+  },
+  "formatLabel": {
+    "message": "Формат"
+  },
+  "formatHint": {
+    "message": "Выбрать формат файла субтитров"
+  },
+  "downloadButtonHint": {
+    "message": "Скачать субтитры файлом"
+  },
+  "copyButtonHint": {
+    "message": "Скопировать субтитры в буфер обмена"
+  },
+  "translateButtonHint": {
+    "message": "Перевести субтитры на другой язык"
+  },
+  "sameLanguageHint": {
+    "message": "Выберите другой язык перевода — это уже язык оригинала"
+  },
+  "translationActiveLine": {
+    "message": "Скачивание и копирование теперь используют перевод на $LANG$",
+    "placeholders": {
+      "lang": {
+        "content": "$1"
+      }
+    }
+  },
+  "signInButton": {
+    "message": "Войти через Google"
+  },
+  "signedInAs": {
+    "message": "Вы вошли как $EMAIL$",
+    "placeholders": {
+      "email": {
+        "content": "$1"
+      }
+    }
+  },
+  "noSubtitles": {
+    "message": "Для этого видео нет субтитров"
+  },
+  "loading": {
+    "message": "Загрузка..."
+  },
+  "translating": {
+    "message": "Перевод..."
+  },
+  "error": {
+    "message": "Что-то пошло не так"
+  },
+  "notSignedInError": {
+    "message": "Вы не вошли в аккаунт"
+  },
+  "signInRequiredNotice": {
+    "message": "Войдите через Google, чтобы скачивать или копировать субтитры."
+  },
+  "sessionExpiredError": {
+    "message": "Сессия истекла — войдите снова"
+  },
+  "authFailedError": {
+    "message": "Не удалось войти через Google, попробуйте ещё раз"
+  },
+  "bannedError": {
+    "message": "Этот аккаунт заблокирован"
+  },
+  "emailConflictError": {
+    "message": "Этот email уже используется"
+  },
+  "videoQuotaError": {
+    "message": "Лимит роликов на сегодня исчерпан. Сброс в $TIME$",
+    "placeholders": {
+      "time": {
+        "content": "$1"
+      }
+    }
+  },
+  "charCapError": {
+    "message": "Исчерпан лимит перевода"
+  },
+  "rateLimitedError": {
+    "message": "Слишком много запросов — подождите и попробуйте снова"
+  },
+  "llmFailedError": {
+    "message": "Перевод временно недоступен"
+  },
+  "notReadyError": {
+    "message": "Сервис временно недоступен — попробуйте чуть позже"
+  },
+  "translationBusyError": {
+    "message": "Перевод ещё считается — подождите"
+  },
+  "quotaFreeLine": {
+    "message": "Бесплатный план: осталось $REMAINING$ роликов сегодня",
+    "placeholders": {
+      "remaining": {
+        "content": "$1"
+      }
+    }
+  },
+  "quotaProLine": {
+    "message": "Pro: без ограничений"
+  },
+  "reviewToastText": {
+    "message": "Нравится расширение?"
+  },
+  "reviewToastRateLabel": {
+    "message": "Оценить на $STARS$",
+    "placeholders": {
+      "stars": {
+        "content": "$1"
+      }
+    }
+  },
+  "welcomeTitle": {
+    "message": "Добро пожаловать в YouTube Subtitle Downloader"
+  },
+  "welcomeSubtitle": {
+    "message": "Скачивайте, копируйте и переводите субтитры YouTube в один клик."
+  },
+  "welcomeStep1": {
+    "message": "Откройте любое видео на YouTube."
+  },
+  "welcomeStep2": {
+    "message": "Нажмите на круглую кнопку «CC» в правом верхнем углу страницы."
+  },
+  "welcomeStep3": {
+    "message": "Выберите язык и формат — SRT, VTT или TXT."
+  },
+  "welcomeStep4": {
+    "message": "Скачайте файл или скопируйте текст прямо в буфер обмена."
+  },
+  "welcomeTranslateTitle": {
+    "message": "Нужен перевод?"
+  },
+  "welcomeTranslateText": {
+    "message": "Войдите через Google прямо в панели, чтобы переводить субтитры на другой язык — только перевод или билингва (оригинал + перевод в каждой строке)."
+  },
+  "welcomeCta": {
+    "message": "Открыть YouTube"
+  },
+  "langName_EN": {
+    "message": "Английский"
+  },
+  "langName_ES": {
+    "message": "Испанский"
+  },
+  "langName_RU": {
+    "message": "Русский"
+  },
+  "langName_PT": {
+    "message": "Португальский"
+  },
+  "langName_HI": {
+    "message": "Хинди"
+  },
+  "langName_DE": {
+    "message": "Немецкий"
+  },
+  "langName_FR": {
+    "message": "Французский"
+  },
+  "langName_JA": {
+    "message": "Японский"
+  },
+  "langName_KO": {
+    "message": "Корейский"
+  },
+  "langName_AR": {
+    "message": "Арабский"
+  },
+  "langName_ZH": {
+    "message": "Китайский (мандарин)"
+  },
+  "langName_YUE": {
+    "message": "Кантонский"
+  },
+  "langName_ID": {
+    "message": "Индонезийский"
+  },
+  "langName_TR": {
+    "message": "Турецкий"
+  },
+  "langName_VI": {
+    "message": "Вьетнамский"
+  },
+  "langName_TH": {
+    "message": "Тайский"
+  },
+  "langName_FIL": {
+    "message": "Филиппинский"
+  },
+  "langName_BN": {
+    "message": "Бенгальский"
+  },
+  "langName_TE": {
+    "message": "Телугу"
+  },
+  "langName_MR": {
+    "message": "Маратхи"
+  },
+  "langName_TA": {
+    "message": "Тамильский"
+  },
+  "langName_UR": {
+    "message": "Урду"
+  },
+  "langName_FA": {
+    "message": "Персидский"
+  },
+  "langName_HE": {
+    "message": "Иврит"
+  },
+  "langName_MS": {
+    "message": "Малайский"
+  },
+  "langName_IT": {
+    "message": "Итальянский"
+  },
+  "langName_PL": {
+    "message": "Польский"
+  },
+  "langName_NL": {
+    "message": "Нидерландский"
+  },
+  "langName_SV": {
+    "message": "Шведский"
+  },
+  "langName_NO": {
+    "message": "Норвежский"
+  },
+  "langName_DA": {
+    "message": "Датский"
+  },
+  "langName_FI": {
+    "message": "Финский"
+  },
+  "langName_CS": {
+    "message": "Чешский"
+  },
+  "langName_RO": {
+    "message": "Румынский"
+  },
+  "langName_HU": {
+    "message": "Венгерский"
+  },
+  "langName_UK": {
+    "message": "Украинский"
+  },
+  "langName_EL": {
+    "message": "Греческий"
+  },
+  "langName_BG": {
+    "message": "Болгарский"
+  },
+  "langName_HR": {
+    "message": "Хорватский"
+  },
+  "langName_SR": {
+    "message": "Сербский"
+  },
+  "langName_SK": {
+    "message": "Словацкий"
+  },
+  "langName_LT": {
+    "message": "Литовский"
+  },
+  "langName_LV": {
+    "message": "Латышский"
+  },
+  "langName_ET": {
+    "message": "Эстонский"
+  },
+  "langName_CA": {
+    "message": "Каталанский"
+  },
+  "langName_KK": {
+    "message": "Казахский"
+  },
+  "langName_UZ": {
+    "message": "Узбекский"
+  },
+  "langName_AZ": {
+    "message": "Азербайджанский"
+  },
+  "langName_KA": {
+    "message": "Грузинский"
+  },
+  "langName_HY": {
+    "message": "Армянский"
+  },
+  "langName_SW": {
+    "message": "Суахили"
+  },
+  "langName_AF": {
+    "message": "Африкаанс"
+  },
+  "langName_PA": {
+    "message": "Панджаби"
+  },
+  "langName_GU": {
+    "message": "Гуджарати"
+  },
+  "langName_KN": {
+    "message": "Каннада"
+  },
+  "langName_ML": {
+    "message": "Малаялам"
+  },
+  "langName_SI": {
+    "message": "Сингальский"
+  },
+  "langName_KM": {
+    "message": "Кхмерский"
+  },
+  "langName_MY": {
+    "message": "Бирманский"
+  },
+  "langName_IS": {
+    "message": "Исландский"
+  }
 }

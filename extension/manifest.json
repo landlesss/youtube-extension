@@ -1,5 +1,6 @@
 {
   "manifest_version": 3,
+  "key": "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAqhQKZI29f+pmz+dSscApPlVrrTW6BcJjp9EWsNx/PkpOa6VCaE/wlXVPYa72usxxPvgsOZ30G5cNz1t2VZauGbZQWY4J86X9A35PfS44iqYYiN9C/n2FQlOPjjy4d/UNWR9yhnxmTPBsb1lsS3F0Kxwbp4vBHVKJh67Qn3gQQIVPuADAishegJxh2jxfBOyu8YEurhEDiu4s3t5yYniP2pnSUDnQQBWzs62Q2iiADK1v/XzFirg/rsZZ+xxWIX3c7gK+k1+g1GJwBAhXWVyZw0ijf5ZejnGZBOPwmD0V5FXg0D9NXeKUoB7NVj0JjKGK19ZIr1hQsCe8yY/Dn1z+OQIDAQAB",
   "name": "__MSG_extName__",
   "description": "__MSG_extDescription__",
   "version": "0.1.0",
@@ -28,14 +29,20 @@
       "run_at": "document_idle"
     }
   ],
+  "web_accessible_resources": [
+    {
+      "resources": ["icons/*.png"],
+      "matches": ["https://www.youtube.com/*"]
+    }
+  ],
   "permissions": ["storage", "identity", "activeTab"],
   "host_permissions": [
     "https://www.youtube.com/*",
-    "http://localhost:8787/*",
-    "https://api.yt-subtitles.example/*"
+    "https://downloadsubtitles.online/*",
+    "http://localhost:8787/*"
   ],
   "oauth2": {
-    "client_id": "REPLACE_WITH_GOOGLE_OAUTH_CLIENT_ID.apps.googleusercontent.com",
+    "client_id": "580978616059-hlmouccc69gkmml81ouuusi50nd8s175.apps.googleusercontent.com",
     "scopes": ["openid", "email", "profile"]
   },
   "minimum_chrome_version": "116"

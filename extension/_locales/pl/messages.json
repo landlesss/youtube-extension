@@ -1,0 +1,360 @@
+{
+  "extName": {
+    "message": "Pobierz napisy z YouTube"
+  },
+  "extDescription": {
+    "message": "Pobierz i przetłumacz napisy z YouTube błyskawicznie. Obsługa 100+ języków."
+  },
+  "panelTitle": {
+    "message": "Subtitles"
+  },
+  "closeButton": {
+    "message": "Close"
+  },
+  "downloadButton": {
+    "message": "Download"
+  },
+  "copyButton": {
+    "message": "Copy"
+  },
+  "copiedStatus": {
+    "message": "Copied!"
+  },
+  "translateButton": {
+    "message": "Translate"
+  },
+  "languageLabel": {
+    "message": "Original language"
+  },
+  "targetLanguageLabel": {
+    "message": "Translate to"
+  },
+  "modeLabel": {
+    "message": "Mode"
+  },
+  "modeTranslationOnly": {
+    "message": "Translation only"
+  },
+  "modeBilingual": {
+    "message": "Original + translation"
+  },
+  "formatLabel": {
+    "message": "Format"
+  },
+  "formatHint": {
+    "message": "Choose the subtitle file format"
+  },
+  "downloadButtonHint": {
+    "message": "Download subtitles as a file"
+  },
+  "copyButtonHint": {
+    "message": "Copy subtitles to your clipboard"
+  },
+  "translateButtonHint": {
+    "message": "Translate subtitles into another language"
+  },
+  "sameLanguageHint": {
+    "message": "Pick a different target language — it's already in the original language"
+  },
+  "translationActiveLine": {
+    "message": "Download & Copy will use the $LANG$ translation",
+    "placeholders": {
+      "lang": {
+        "content": "$1"
+      }
+    }
+  },
+  "signInButton": {
+    "message": "Sign in with Google"
+  },
+  "signedInAs": {
+    "message": "Signed in as $EMAIL$",
+    "placeholders": {
+      "email": {
+        "content": "$1"
+      }
+    }
+  },
+  "noSubtitles": {
+    "message": "No subtitles available for this video"
+  },
+  "loading": {
+    "message": "Loading..."
+  },
+  "translating": {
+    "message": "Translating..."
+  },
+  "error": {
+    "message": "Something went wrong"
+  },
+  "notSignedInError": {
+    "message": "Not signed in"
+  },
+  "signInRequiredNotice": {
+    "message": "Sign in with Google to download or copy subtitles."
+  },
+  "sessionExpiredError": {
+    "message": "Your session expired — please sign in again"
+  },
+  "authFailedError": {
+    "message": "Couldn't sign in with Google, please try again"
+  },
+  "bannedError": {
+    "message": "This account has been blocked"
+  },
+  "emailConflictError": {
+    "message": "This email is already in use"
+  },
+  "videoQuotaError": {
+    "message": "Daily video limit reached. Resets at $TIME$",
+    "placeholders": {
+      "time": {
+        "content": "$1"
+      }
+    }
+  },
+  "charCapError": {
+    "message": "Translation limit reached"
+  },
+  "rateLimitedError": {
+    "message": "Too many requests — please wait and try again"
+  },
+  "llmFailedError": {
+    "message": "Translation is temporarily unavailable"
+  },
+  "notReadyError": {
+    "message": "Service is temporarily unavailable — try again shortly"
+  },
+  "translationBusyError": {
+    "message": "Still translating — please wait"
+  },
+  "quotaFreeLine": {
+    "message": "Free plan: $REMAINING$ videos left today",
+    "placeholders": {
+      "remaining": {
+        "content": "$1"
+      }
+    }
+  },
+  "quotaProLine": {
+    "message": "Pro plan: unlimited"
+  },
+  "reviewToastText": {
+    "message": "Enjoying the extension?"
+  },
+  "reviewToastRateLabel": {
+    "message": "Rate $STARS$ stars",
+    "placeholders": {
+      "stars": {
+        "content": "$1"
+      }
+    }
+  },
+  "welcomeTitle": {
+    "message": "Welcome to YouTube Subtitle Downloader"
+  },
+  "welcomeSubtitle": {
+    "message": "Download, copy and translate YouTube subtitles in one click."
+  },
+  "welcomeStep1": {
+    "message": "Open any video on YouTube."
+  },
+  "welcomeStep2": {
+    "message": "Click the round \"CC\" button in the top-right corner of the page."
+  },
+  "welcomeStep3": {
+    "message": "Pick a language and a format — SRT, VTT or TXT."
+  },
+  "welcomeStep4": {
+    "message": "Download the file or copy the text straight to your clipboard."
+  },
+  "welcomeTranslateTitle": {
+    "message": "Want a translation?"
+  },
+  "welcomeTranslateText": {
+    "message": "Sign in with Google in the panel to translate subtitles into another language — either translation-only or as bilingual, original + translation, lines."
+  },
+  "welcomeCta": {
+    "message": "Open YouTube"
+  },
+  "langName_EN": {
+    "message": "English"
+  },
+  "langName_ES": {
+    "message": "Spanish"
+  },
+  "langName_RU": {
+    "message": "Russian"
+  },
+  "langName_PT": {
+    "message": "Portuguese"
+  },
+  "langName_HI": {
+    "message": "Hindi"
+  },
+  "langName_DE": {
+    "message": "German"
+  },
+  "langName_FR": {
+    "message": "French"
+  },
+  "langName_JA": {
+    "message": "Japanese"
+  },
+  "langName_KO": {
+    "message": "Korean"
+  },
+  "langName_AR": {
+    "message": "Arabic"
+  },
+  "langName_ZH": {
+    "message": "Chinese (Mandarin)"
+  },
+  "langName_YUE": {
+    "message": "Cantonese"
+  },
+  "langName_ID": {
+    "message": "Indonesian"
+  },
+  "langName_TR": {
+    "message": "Turkish"
+  },
+  "langName_VI": {
+    "message": "Vietnamese"
+  },
+  "langName_TH": {
+    "message": "Thai"
+  },
+  "langName_FIL": {
+    "message": "Filipino"
+  },
+  "langName_BN": {
+    "message": "Bengali"
+  },
+  "langName_TE": {
+    "message": "Telugu"
+  },
+  "langName_MR": {
+    "message": "Marathi"
+  },
+  "langName_TA": {
+    "message": "Tamil"
+  },
+  "langName_UR": {
+    "message": "Urdu"
+  },
+  "langName_FA": {
+    "message": "Persian"
+  },
+  "langName_HE": {
+    "message": "Hebrew"
+  },
+  "langName_MS": {
+    "message": "Malay"
+  },
+  "langName_IT": {
+    "message": "Italian"
+  },
+  "langName_PL": {
+    "message": "Polish"
+  },
+  "langName_NL": {
+    "message": "Dutch"
+  },
+  "langName_SV": {
+    "message": "Swedish"
+  },
+  "langName_NO": {
+    "message": "Norwegian"
+  },
+  "langName_DA": {
+    "message": "Danish"
+  },
+  "langName_FI": {
+    "message": "Finnish"
+  },
+  "langName_CS": {
+    "message": "Czech"
+  },
+  "langName_RO": {
+    "message": "Romanian"
+  },
+  "langName_HU": {
+    "message": "Hungarian"
+  },
+  "langName_UK": {
+    "message": "Ukrainian"
+  },
+  "langName_EL": {
+    "message": "Greek"
+  },
+  "langName_BG": {
+    "message": "Bulgarian"
+  },
+  "langName_HR": {
+    "message": "Croatian"
+  },
+  "langName_SR": {
+    "message": "Serbian"
+  },
+  "langName_SK": {
+    "message": "Slovak"
+  },
+  "langName_LT": {
+    "message": "Lithuanian"
+  },
+  "langName_LV": {
+    "message": "Latvian"
+  },
+  "langName_ET": {
+    "message": "Estonian"
+  },
+  "langName_CA": {
+    "message": "Catalan"
+  },
+  "langName_KK": {
+    "message": "Kazakh"
+  },
+  "langName_UZ": {
+    "message": "Uzbek"
+  },
+  "langName_AZ": {
+    "message": "Azerbaijani"
+  },
+  "langName_KA": {
+    "message": "Georgian"
+  },
+  "langName_HY": {
+    "message": "Armenian"
+  },
+  "langName_SW": {
+    "message": "Swahili"
+  },
+  "langName_AF": {
+    "message": "Afrikaans"
+  },
+  "langName_PA": {
+    "message": "Punjabi"
+  },
+  "langName_GU": {
+    "message": "Gujarati"
+  },
+  "langName_KN": {
+    "message": "Kannada"
+  },
+  "langName_ML": {
+    "message": "Malayalam"
+  },
+  "langName_SI": {
+    "message": "Sinhala"
+  },
+  "langName_KM": {
+    "message": "Khmer"
+  },
+  "langName_MY": {
+    "message": "Burmese"
+  },
+  "langName_IS": {
+    "message": "Icelandic"
+  }
+}
