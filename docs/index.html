@@ -1,0 +1,649 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>YouTube Subtitle Downloader — download, translate, and copy captions</title>
+<meta name="description" content="Chrome extension that downloads, translates, and copies YouTube subtitles in 60 languages. How it works, and the privacy policy.">
+<style>
+  :root {
+    --bg: #f7f9fb;
+    --surface: #ffffff;
+    --surface-2: #eef3f7;
+    --ink: #10192a;
+    --muted: #5b6b80;
+    --faint: #93a1b2;
+    --border: #dde5ec;
+    --accent: #0d9488;
+    --accent-ink: #ffffff;
+    --accent-soft: #e3f7f4;
+    --highlight: #c97a1f;
+    --highlight-soft: #fbeedb;
+    --shadow: 0 1px 2px rgba(16, 25, 42, 0.04), 0 12px 32px -16px rgba(16, 25, 42, 0.18);
+
+    --font-head: Georgia, "Iowan Old Style", "Palatino Linotype", Palatino, serif;
+    --font-ui: -apple-system, "SF Pro Text", "Segoe UI", system-ui, sans-serif;
+    --font-mono: ui-monospace, "SF Mono", "Cascadia Code", Menlo, Consolas, monospace;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #0b1220;
+      --surface: #121a2a;
+      --surface-2: #182233;
+      --ink: #e9eef5;
+      --muted: #93a3b8;
+      --faint: #5c6b80;
+      --border: #253046;
+      --accent: #4fd1c5;
+      --accent-ink: #06211e;
+      --accent-soft: #123330;
+      --highlight: #e3a75c;
+      --highlight-soft: #2e2314;
+      --shadow: 0 1px 2px rgba(0, 0, 0, 0.3), 0 20px 44px -20px rgba(0, 0, 0, 0.6);
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #0b1220;
+    --surface: #121a2a;
+    --surface-2: #182233;
+    --ink: #e9eef5;
+    --muted: #93a3b8;
+    --faint: #5c6b80;
+    --border: #253046;
+    --accent: #4fd1c5;
+    --accent-ink: #06211e;
+    --accent-soft: #123330;
+    --highlight: #e3a75c;
+    --highlight-soft: #2e2314;
+    --shadow: 0 1px 2px rgba(0, 0, 0, 0.3), 0 20px 44px -20px rgba(0, 0, 0, 0.6);
+  }
+
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  @media (prefers-reduced-motion: reduce) {
+    html { scroll-behavior: auto; }
+    *, *::before, *::after { animation-duration: 0.001ms !important; transition-duration: 0.001ms !important; }
+  }
+
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: var(--font-ui);
+    -webkit-font-smoothing: antialiased;
+    overflow-x: hidden;
+  }
+
+  a { color: inherit; }
+
+  .wrap { max-width: 980px; margin: 0 auto; padding: 0 28px; }
+
+  /* ---------- nav ---------- */
+  .nav {
+    position: sticky; top: 0; z-index: 40;
+    background: color-mix(in srgb, var(--bg) 86%, transparent);
+    backdrop-filter: blur(10px);
+    border-bottom: 1px solid var(--border);
+  }
+  .nav-inner { display: flex; align-items: center; justify-content: space-between; padding: 14px 28px; max-width: 980px; margin: 0 auto; }
+  .brand { display: flex; align-items: center; gap: 10px; text-decoration: none; }
+  .brand-mark {
+    width: 26px; height: 26px; border-radius: 50%; flex: none;
+    background:
+      radial-gradient(circle at 32% 28%, #bfe3ff, transparent 45%),
+      radial-gradient(circle at 60% 70%, #0a1a3d, transparent 70%),
+      linear-gradient(135deg, #5cb0ff, #17429a 60%, #0a1a3d);
+    box-shadow: inset 0 0 0 1px rgba(255,255,255,0.15);
+  }
+  .brand-name { font-family: var(--font-mono); font-size: 13px; font-weight: 600; letter-spacing: 0.01em; }
+  .nav-links { display: flex; align-items: center; gap: 26px; }
+  .nav-links a { font-size: 13.5px; color: var(--muted); text-decoration: none; }
+  .nav-links a:hover { color: var(--ink); }
+  .nav-cta {
+    font-family: var(--font-ui); font-size: 13px; font-weight: 600;
+    background: var(--accent); color: var(--accent-ink);
+    padding: 8px 14px; border-radius: 7px; text-decoration: none;
+    white-space: nowrap;
+  }
+  .nav-only-desktop { display: flex; }
+  @media (max-width: 640px) { .nav-only-desktop { display: none; } }
+
+  /* ---------- timeline rail ---------- */
+  .rail {
+    position: fixed; left: 22px; top: 50%; transform: translateY(-50%);
+    z-index: 30; display: flex; flex-direction: column; align-items: center; gap: 14px;
+  }
+  .rail::before {
+    content: ""; position: absolute; top: -20px; bottom: -20px; left: 50%; width: 1px;
+    background: var(--border); transform: translateX(-50%); z-index: -1;
+  }
+  .rail button {
+    width: 9px; height: 9px; border-radius: 50%; padding: 0; border: 1.5px solid var(--faint);
+    background: var(--bg); cursor: pointer;
+  }
+  .rail button.active { background: var(--highlight); border-color: var(--highlight); transform: scale(1.25); }
+  @media (max-width: 900px) { .rail { display: none; } }
+
+  /* ---------- cue blocks (shared structural device) ---------- */
+  .cue { padding: 76px 0 0; scroll-margin-top: 70px; }
+  .cue:first-of-type { padding-top: 56px; }
+  .cue-meta {
+    display: flex; align-items: baseline; gap: 12px; margin-bottom: 18px;
+    font-family: var(--font-mono); font-size: 12px; color: var(--faint);
+  }
+  .cue-num { color: var(--highlight); font-weight: 600; }
+  .cue-time { letter-spacing: 0.01em; }
+  .cue-time::before { content: ""; }
+
+  h1, h2, h3 { font-family: var(--font-head); font-weight: 700; letter-spacing: -0.01em; text-wrap: balance; margin: 0; }
+
+  /* ---------- hero ---------- */
+  .hero { display: grid; grid-template-columns: 1.05fr 0.95fr; gap: 48px; align-items: center; }
+  @media (max-width: 860px) { .hero { grid-template-columns: 1fr; } }
+  .hero h1 { font-size: 46px; line-height: 1.08; }
+  .hero .lede { font-family: var(--font-ui); font-size: 17px; line-height: 1.6; color: var(--muted); max-width: 46ch; margin: 18px 0 28px; }
+  .cta-row { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
+  .btn-primary {
+    display: inline-flex; align-items: center; gap: 8px;
+    background: var(--accent); color: var(--accent-ink);
+    font-family: var(--font-ui); font-weight: 700; font-size: 14.5px;
+    padding: 12px 20px; border-radius: 9px; text-decoration: none;
+    box-shadow: var(--shadow);
+  }
+  .btn-ghost {
+    display: inline-flex; align-items: center; gap: 6px;
+    background: transparent; color: var(--ink);
+    font-family: var(--font-ui); font-weight: 600; font-size: 14.5px;
+    padding: 12px 16px; border-radius: 9px; text-decoration: none;
+    border: 1px solid var(--border);
+  }
+  .hero-note { margin-top: 14px; font-family: var(--font-mono); font-size: 12px; color: var(--faint); }
+  .stars { color: var(--highlight); letter-spacing: 1px; }
+
+  /* ---------- mock panel demo ---------- */
+  .stage {
+    position: relative; border-radius: 16px; overflow: hidden;
+    background: linear-gradient(160deg, #0a1424, #060b16 65%);
+    box-shadow: var(--shadow);
+    aspect-ratio: 4 / 3.1;
+  }
+  .stage-video {
+    position: absolute; inset: 0; opacity: 0.65;
+    background:
+      radial-gradient(circle at 30% 24%, rgba(255,255,255,0.16), transparent 40%),
+      repeating-linear-gradient(115deg, rgba(255,255,255,0.035) 0 2px, transparent 2px 26px);
+  }
+  .stage-caption {
+    position: absolute; left: 50%; bottom: 14%; transform: translateX(-50%);
+    background: rgba(0,0,0,0.55); color: #fff; font-family: var(--font-ui);
+    font-size: 12.5px; padding: 4px 10px; border-radius: 4px; white-space: nowrap;
+  }
+  .panel-mock {
+    position: absolute; top: 8%; right: 6%; width: 240px;
+    background: #0f0f0f; border: 1px solid #2a3446; border-radius: 12px;
+    box-shadow: 0 20px 40px -12px rgba(0,0,0,0.6);
+    padding: 12px; font-family: var(--font-ui); color: #f1f1f1;
+  }
+  .panel-mock-head { display: flex; align-items: center; gap: 7px; font-size: 12px; font-weight: 700; margin-bottom: 10px; }
+  .panel-mock-head .dot {
+    width: 15px; height: 15px; border-radius: 50%; flex: none;
+    background: radial-gradient(circle at 32% 28%, #bfe3ff, transparent 45%), linear-gradient(135deg, #5cb0ff, #17429a 60%, #0a1a3d);
+  }
+  .panel-mock-row { background: #1a2b3a; border: 1px solid #24384a; border-radius: 8px; padding: 6px 8px; margin-bottom: 6px; }
+  .panel-mock-ts { display: block; font-size: 9px; color: #7fb8f0; font-weight: 700; margin-bottom: 2px; }
+  .panel-mock-orig { font-size: 10.5px; color: #e8edf5; }
+  .panel-mock-trans { font-size: 10.5px; color: #4fd1c5; margin-top: 4px; padding-top: 4px; border-top: 1px dashed #2a3450; }
+  .panel-mock-grid { display: flex; gap: 5px; margin-top: 8px; }
+  .panel-mock-cell {
+    flex: 1; background: #182035; border: 1px solid #2a3450; border-radius: 7px;
+    padding: 6px 2px; text-align: center; font-size: 8.5px; color: #9db3d6; font-weight: 600;
+  }
+  .panel-mock-cell.active { border-color: #4fd1c5; background: #1c3d3a; color: #4fd1c5; }
+  .panel-mock-status { margin-top: 7px; font-size: 8.5px; color: #7fb8f0; line-height: 1.4; }
+
+  /* ---------- steps ---------- */
+  .steps { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; }
+  @media (max-width: 760px) { .steps { grid-template-columns: 1fr 1fr; } }
+  @media (max-width: 460px) { .steps { grid-template-columns: 1fr; } }
+  .step {
+    background: var(--surface); border: 1px solid var(--border); border-radius: 12px;
+    padding: 18px 16px; box-shadow: var(--shadow);
+  }
+  .step-num { font-family: var(--font-mono); font-size: 11px; color: var(--highlight); margin-bottom: 8px; }
+  .step h3 { font-size: 15.5px; margin-bottom: 6px; }
+  .step p { font-family: var(--font-ui); font-size: 13.5px; color: var(--muted); line-height: 1.55; margin: 0; }
+
+  /* ---------- languages ---------- */
+  .lang-search {
+    display: flex; align-items: center; gap: 10px;
+    background: var(--surface); border: 1px solid var(--border); border-radius: 10px;
+    padding: 10px 14px; margin-bottom: 16px; max-width: 340px;
+  }
+  .lang-search input {
+    border: none; outline: none; background: transparent; color: var(--ink);
+    font-family: var(--font-ui); font-size: 14px; width: 100%;
+  }
+  .lang-search input::placeholder { color: var(--faint); }
+  .lang-count { font-family: var(--font-mono); font-size: 12px; color: var(--faint); margin-bottom: 14px; }
+  .lang-grid { display: flex; flex-wrap: wrap; gap: 8px; }
+  .lang-chip {
+    font-family: var(--font-ui); font-size: 13px; color: var(--ink);
+    background: var(--surface-2); border: 1px solid var(--border);
+    padding: 6px 12px; border-radius: 999px; white-space: nowrap;
+  }
+  .lang-chip b { color: var(--muted); font-weight: 500; }
+  .lang-empty { font-family: var(--font-ui); font-size: 13.5px; color: var(--muted); padding: 8px 0; }
+
+  /* ---------- formats ---------- */
+  .fmt-wrap { display: grid; grid-template-columns: 1fr 1fr; gap: 32px; align-items: start; }
+  @media (max-width: 760px) { .fmt-wrap { grid-template-columns: 1fr; } }
+  .fmt-row { display: flex; gap: 8px; margin: 16px 0 20px; }
+  .fmt-tag {
+    font-family: var(--font-mono); font-size: 12.5px; font-weight: 600;
+    border: 1px solid var(--border); border-radius: 7px; padding: 5px 10px; color: var(--muted);
+  }
+  .fmt-tag.on { color: var(--accent); border-color: var(--accent); background: var(--accent-soft); }
+  .bilingual-card {
+    background: #0f0f0f; border-radius: 12px; padding: 16px; box-shadow: var(--shadow);
+    font-family: var(--font-ui);
+  }
+  .bilingual-card .ts { font-family: var(--font-mono); font-size: 10.5px; color: #7fb8f0; margin-bottom: 4px; display: block; }
+  .bilingual-card .orig { color: #e8edf5; font-size: 14px; }
+  .bilingual-card .trans { color: #4fd1c5; font-size: 14px; margin-top: 8px; padding-top: 8px; border-top: 1px dashed #2a3450; }
+  .fmt-copy p { font-family: var(--font-ui); font-size: 14.5px; color: var(--muted); line-height: 1.65; max-width: 42ch; }
+
+  /* ---------- final cta ---------- */
+  .cta-band {
+    background: var(--surface); border: 1px solid var(--border); border-radius: 16px;
+    padding: 40px 36px; text-align: center; box-shadow: var(--shadow);
+  }
+  .cta-band h2 { font-size: 27px; margin-bottom: 10px; }
+  .cta-band p { font-family: var(--font-ui); color: var(--muted); margin: 0 0 22px; }
+
+  /* ---------- privacy ---------- */
+  .privacy-head { border-top: 1px solid var(--border); padding-top: 56px; }
+  .privacy-head .cue-meta { color: var(--faint); }
+  .toc {
+    background: var(--surface); border: 1px solid var(--border); border-radius: 10px;
+    padding: 16px 20px; margin: 26px 0 44px;
+  }
+  .toc-label { font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--faint); display: block; margin-bottom: 10px; }
+  .toc ol { margin: 0; padding: 0; list-style: none; columns: 2; column-gap: 24px; }
+  .toc li { break-inside: avoid; margin-bottom: 6px; }
+  .toc a { font-size: 13.5px; text-decoration: none; display: flex; gap: 8px; }
+  .toc a:hover { color: var(--accent); }
+  .toc a .n { font-family: var(--font-mono); color: var(--accent); font-size: 12.5px; }
+  @media (max-width: 560px) { .toc ol { columns: 1; } }
+
+  .psec { margin-bottom: 36px; padding-left: 18px; border-left: 2px solid var(--border); scroll-margin-top: 70px; }
+  .psec .eyebrow { font-family: var(--font-mono); font-size: 11.5px; color: var(--accent); margin-bottom: 6px; }
+  .psec h3 { font-size: 19px; margin-bottom: 10px; }
+  .psec p { font-family: Georgia, serif; font-size: 15.5px; line-height: 1.65; max-width: 62ch; margin: 0 0 12px; color: var(--ink); }
+  .psec ul { font-family: Georgia, serif; font-size: 15.5px; line-height: 1.6; max-width: 62ch; margin: 0 0 12px; padding-left: 20px; }
+  .psec li { margin-bottom: 5px; }
+  .field-list {
+    display: grid; grid-template-columns: max-content 1fr; gap: 6px 16px;
+    background: var(--surface); border: 1px solid var(--border); border-radius: 8px;
+    padding: 14px 18px; margin: 0 0 14px; font-family: var(--font-ui); font-size: 14px;
+  }
+  .field-list dt { color: var(--muted); white-space: nowrap; }
+  .field-list dd { margin: 0; }
+  .callout { background: var(--accent-soft); border-radius: 8px; padding: 14px 16px; font-family: var(--font-ui); font-size: 14px; margin: 0 0 14px; }
+  .ph { font-family: var(--font-mono); background: var(--surface-2); border: 1px dashed var(--faint); border-radius: 4px; padding: 1px 6px; color: var(--highlight); font-size: 0.92em; }
+
+  footer {
+    margin-top: 60px; padding: 26px 0 60px; border-top: 1px solid var(--border);
+    font-family: var(--font-mono); font-size: 12px; color: var(--faint);
+    display: flex; justify-content: space-between; flex-wrap: wrap; gap: 8px;
+  }
+</style>
+</head>
+<body>
+
+<nav class="nav">
+  <div class="nav-inner">
+    <a class="brand" href="#top">
+      <span class="brand-mark"></span>
+      <span class="brand-name">yt-subtitles</span>
+    </a>
+    <div class="nav-links nav-only-desktop">
+      <a href="#how">How it works</a>
+      <a href="#languages">Languages</a>
+      <a href="#formats">Formats</a>
+      <a href="#privacy">Privacy</a>
+    </div>
+    <a class="nav-cta" href="#get" data-store-link>Add to Chrome</a>
+  </div>
+</nav>
+
+<div class="rail" id="rail" aria-hidden="true"></div>
+
+<main class="wrap" id="top">
+
+  <!-- CUE 001 — HERO -->
+  <section class="cue" id="hero" data-cue="Hero">
+    <div class="cue-meta">
+      <span class="cue-num">001</span>
+      <span class="cue-time">00:00:00,000&nbsp;→&nbsp;00:00:06,000</span>
+    </div>
+    <div class="hero">
+      <div>
+        <h1>Every caption,<br>any language.</h1>
+        <p class="lede">Download YouTube subtitles as SRT, VTT, or plain text — or translate them into any of 60 languages first, right from the video page. No account required to try it.</p>
+        <div class="cta-row">
+          <a class="btn-primary" href="#get" data-store-link>⬇ Add to Chrome — it's free</a>
+          <a class="btn-ghost" href="#how">See how it works</a>
+        </div>
+        <div class="hero-note"><span class="stars">★★★★★</span>&nbsp; rated by early users on the Chrome Web Store</div>
+      </div>
+      <div class="stage" aria-hidden="true">
+        <div class="stage-video"></div>
+        <div class="stage-caption">Всё в твоей жизни создаётся твоими мыслями</div>
+        <div class="panel-mock">
+          <div class="panel-mock-head"><span class="dot"></span> Subtitles</div>
+          <div class="panel-mock-row">
+            <span class="panel-mock-ts">0:07</span>
+            <div class="panel-mock-orig">If you can master the correct mindset,</div>
+            <div class="panel-mock-trans">Если ты сможешь освоить правильный настрой,</div>
+          </div>
+          <div class="panel-mock-grid">
+            <div class="panel-mock-cell">SRT ▾</div>
+            <div class="panel-mock-cell">Download</div>
+            <div class="panel-mock-cell">Copy</div>
+            <div class="panel-mock-cell active">Translate</div>
+          </div>
+          <div class="panel-mock-status">Download &amp; Copy will use the Russian translation</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CUE 002 — HOW IT WORKS -->
+  <section class="cue" id="how" data-cue="How it works">
+    <div class="cue-meta">
+      <span class="cue-num">002</span>
+      <span class="cue-time">00:00:06,000&nbsp;→&nbsp;00:00:18,000</span>
+    </div>
+    <h2 style="font-size:27px; margin-bottom:22px;">How it works</h2>
+    <div class="steps">
+      <div class="step">
+        <div class="step-num">01</div>
+        <h3>Open a video</h3>
+        <p>Go to any YouTube video that has captions — auto-generated ones work too.</p>
+      </div>
+      <div class="step">
+        <div class="step-num">02</div>
+        <h3>Tap the icon</h3>
+        <p>A small round button appears on the page. Click it to open the subtitle panel.</p>
+      </div>
+      <div class="step">
+        <div class="step-num">03</div>
+        <h3>Pick language &amp; format</h3>
+        <p>Choose the caption track and SRT, VTT, or TXT — the preview updates instantly.</p>
+      </div>
+      <div class="step">
+        <div class="step-num">04</div>
+        <h3>Download, copy, or translate</h3>
+        <p>Get the original text, or translate it into another language first — either replaces the original or sits under it, line by line.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- CUE 003 — LANGUAGES -->
+  <section class="cue" id="languages" data-cue="Languages">
+    <div class="cue-meta">
+      <span class="cue-num">003</span>
+      <span class="cue-time">00:00:18,000&nbsp;→&nbsp;00:00:30,000</span>
+    </div>
+    <h2 style="font-size:27px;">60 languages, by name</h2>
+    <p style="font-family:var(--font-ui); color:var(--muted); font-size:14.5px; max-width:52ch; margin:10px 0 22px; line-height:1.6;">
+      The picker shows each language the way you'd actually look for it — in your own display language, not just a two-letter code. Try it:
+    </p>
+    <div class="lang-search">
+      <span aria-hidden="true" style="color:var(--faint)">⌕</span>
+      <input id="langInput" type="text" placeholder="Search a language…" autocomplete="off">
+    </div>
+    <div class="lang-count" id="langCount"></div>
+    <div class="lang-grid" id="langGrid"></div>
+    <div class="lang-empty" id="langEmpty" style="display:none;">No language matches “<span id="langEmptyQuery"></span>”.</div>
+  </section>
+
+  <!-- CUE 004 — FORMATS -->
+  <section class="cue" id="formats" data-cue="Formats">
+    <div class="cue-meta">
+      <span class="cue-num">004</span>
+      <span class="cue-time">00:00:30,000&nbsp;→&nbsp;00:00:40,000</span>
+    </div>
+    <h2 style="font-size:27px; margin-bottom:6px;">Every format, both languages if you want</h2>
+    <div class="fmt-wrap" style="margin-top:20px;">
+      <div class="fmt-copy">
+        <div class="fmt-row">
+          <span class="fmt-tag on">SRT</span>
+          <span class="fmt-tag">VTT</span>
+          <span class="fmt-tag">TXT</span>
+        </div>
+        <p>Pick the file your video editor or LMS actually accepts. Translations use the same three formats.</p>
+        <p>In bilingual mode, each line keeps the original directly above its translation — useful for language learners, or for editors who need to check a translation against the source.</p>
+      </div>
+      <div class="bilingual-card">
+        <span class="ts">0:07 → 0:11</span>
+        <div class="orig">If you can master the correct mindset,</div>
+        <div class="trans">Если ты сможешь освоить правильный настрой,</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CUE 005 — CTA -->
+  <section class="cue" id="get" data-cue="Get the extension">
+    <div class="cue-meta">
+      <span class="cue-num">005</span>
+      <span class="cue-time">00:00:40,000&nbsp;→&nbsp;00:00:46,000</span>
+    </div>
+    <div class="cta-band">
+      <h2>Get it in about ten seconds.</h2>
+      <p>Free to install. Sign in with Google only when you're ready to download, copy, or translate.</p>
+      <a class="btn-primary" href="#" data-store-link>⬇ Add to Chrome</a>
+    </div>
+  </section>
+
+  <!-- PRIVACY -->
+  <section class="privacy-head cue" id="privacy" data-cue="Privacy">
+    <div class="cue-meta">
+      <span class="cue-num">006</span>
+      <span class="cue-time">closing&nbsp;reel&nbsp;→&nbsp;the&nbsp;fine&nbsp;print</span>
+    </div>
+    <h2 style="font-size:30px;">Privacy Policy</h2>
+    <p style="font-family:Georgia, serif; color:var(--muted); font-size:16px; max-width:54ch; margin:14px 0 0; line-height:1.6;">
+      YouTube Subtitle Downloader extracts, translates, and downloads YouTube captions. This section explains exactly what data that involves, in plain terms.
+    </p>
+
+    <nav class="toc" aria-label="Table of contents">
+      <span class="toc-label">Contents</span>
+      <ol>
+        <li><a href="#p-overview"><span class="n">01</span> Overview</a></li>
+        <li><a href="#p-collect"><span class="n">02</span> What we collect</a></li>
+        <li><a href="#p-not-collect"><span class="n">03</span> What we don't collect</a></li>
+        <li><a href="#p-use"><span class="n">04</span> How we use it</a></li>
+        <li><a href="#p-share"><span class="n">05</span> Who we share it with</a></li>
+        <li><a href="#p-retention"><span class="n">06</span> Retention</a></li>
+        <li><a href="#p-security"><span class="n">07</span> Security</a></li>
+        <li><a href="#p-choices"><span class="n">08</span> Your choices</a></li>
+        <li><a href="#p-children"><span class="n">09</span> Children</a></li>
+        <li><a href="#p-changes"><span class="n">10</span> Changes</a></li>
+        <li><a href="#p-contact"><span class="n">11</span> Contact</a></li>
+      </ol>
+    </nav>
+
+    <div class="psec" id="p-overview">
+      <div class="eyebrow">01</div>
+      <h3>Overview</h3>
+      <p>YouTube Subtitle Downloader ("the extension", "we") lets you download, copy, and translate subtitles from YouTube videos. Subtitle extraction happens locally in your browser. Signing in and translation involve our backend service at <strong>downloadsubtitles.online</strong> ("the service"). This policy covers both.</p>
+    </div>
+
+    <div class="psec" id="p-collect">
+      <div class="eyebrow">02</div>
+      <h3>What we collect</h3>
+      <p>Only what's needed to run the features you actually use:</p>
+      <dl class="field-list">
+        <dt>Account</dt><dd>Your Google email address and Google account ID, obtained when you sign in with Google.</dd>
+        <dt>Subtitle text</dt><dd>The caption lines of a video, sent to our service only when you use the Translate feature.</dd>
+        <dt>Video ID</dt><dd>The YouTube video's ID, sent when you download, copy, or translate — used to enforce the daily free-plan limit per video.</dd>
+        <dt>Usage</dt><dd>Download/translation counts and character usage tied to your account, for plan limits and billing.</dd>
+        <dt>Local prefs</dt><dd>Your session token and a one-time "rate us" flag, stored only in your browser via <code>chrome.storage.local</code>.</dd>
+      </dl>
+      <p>Downloading or copying subtitles <strong>without</strong> translation does not send the subtitle text itself to our service — it's extracted and written to a file entirely on your device. Signing in is still required so the daily video limit can be enforced.</p>
+    </div>
+
+    <div class="psec" id="p-not-collect">
+      <div class="eyebrow">03</div>
+      <h3>What we don't collect</h3>
+      <ul>
+        <li>No browsing history beyond the specific video you act on</li>
+        <li>No advertising identifiers, no ad network, no third-party analytics/tracking pixels</li>
+        <li>No payment card details (handled entirely by our payment processor if you upgrade — we never see or store card numbers)</li>
+        <li>We never sell or rent your data to anyone</li>
+      </ul>
+    </div>
+
+    <div class="psec" id="p-use">
+      <div class="eyebrow">04</div>
+      <h3>How we use it</h3>
+      <ul>
+        <li>To authenticate you and keep your session signed in</li>
+        <li>To enforce the free-plan daily limit and your character quota</li>
+        <li>To generate translations via our translation provider</li>
+        <li>To diagnose and fix bugs (e.g. failed translation requests)</li>
+      </ul>
+    </div>
+
+    <div class="psec" id="p-share">
+      <div class="eyebrow">05</div>
+      <h3>Who we share it with</h3>
+      <p>A short, fixed list — no data brokers, no ad exchanges:</p>
+      <ul>
+        <li><strong>Google</strong> — to verify your identity when you sign in</li>
+        <li><strong>Our translation provider</strong> — receives the subtitle text you ask to translate, solely to return a translation</li>
+        <li><strong>Our hosting/infrastructure providers</strong> — run the servers our service operates on, under standard confidentiality terms</li>
+      </ul>
+      <p>We may disclose information if required by law, or to protect the security of the service against abuse.</p>
+      <div class="callout">If you rate the extension 4-5 stars, we open the Chrome Web Store review page. If you rate it 1-3 stars, we open a Google Form instead, so we can follow up on feedback privately rather than it becoming a public review. Either way this is a link you choose to click — we don't submit anything on your behalf. If you fill out the feedback form, we can see what you submit there; the form itself is hosted and operated by Google under <a href="https://policies.google.com/privacy" target="_blank" rel="noopener noreferrer">Google's own privacy policy</a>.</div>
+    </div>
+
+    <div class="psec" id="p-retention">
+      <div class="eyebrow">06</div>
+      <h3>Retention</h3>
+      <p>We keep your account data for as long as your account is active. If you ask us to delete your account (see <a href="#p-contact">Contact</a>), we delete your account record and stop retaining new usage data going forward. Subtitle text sent for translation is processed to return a result and is not kept longer than necessary to do that and to prevent abuse of the service.</p>
+    </div>
+
+    <div class="psec" id="p-security">
+      <div class="eyebrow">07</div>
+      <h3>Security</h3>
+      <p>All traffic between the extension and our service is encrypted in transit (HTTPS). Access to account data is limited to what's needed to operate the service. No method of transmission or storage is 100% secure, and we can't guarantee absolute security — but we don't treat that as an excuse not to take reasonable precautions.</p>
+    </div>
+
+    <div class="psec" id="p-choices">
+      <div class="eyebrow">08</div>
+      <h3>Your choices</h3>
+      <ul>
+        <li><strong>Sign out</strong> any time from the extension panel — this clears your local session</li>
+        <li><strong>Revoke access</strong> from your <a href="https://myaccount.google.com/permissions" target="_blank" rel="noopener noreferrer">Google Account permissions page</a> at any time</li>
+        <li><strong>Delete your account</strong> by contacting us (see below) — we'll remove your account record</li>
+        <li><strong>Uninstall</strong> the extension at any time from <code>chrome://extensions</code>, which also clears all local data it stored</li>
+      </ul>
+    </div>
+
+    <div class="psec" id="p-children">
+      <div class="eyebrow">09</div>
+      <h3>Children</h3>
+      <p>This extension is not directed at children under 13, and we don't knowingly collect data from them.</p>
+    </div>
+
+    <div class="psec" id="p-changes">
+      <div class="eyebrow">10</div>
+      <h3>Changes to this policy</h3>
+      <p>If we make material changes, we'll update the "last updated" date below and, where appropriate, note it in the extension's release notes.</p>
+      <div class="callout">Last updated: 25 August 2026</div>
+    </div>
+
+    <div class="psec" id="p-contact" style="margin-bottom:0;">
+      <div class="eyebrow">11</div>
+      <h3>Contact</h3>
+      <p>Questions, deletion requests, or anything else about this policy — reach us at <a href="mailto:supportdownloadsubtitles@gmail.com">supportdownloadsubtitles@gmail.com</a>.</p>
+    </div>
+  </section>
+
+  <footer>
+    <span>YouTube Subtitle Downloader</span>
+    <span>Not affiliated with YouTube or Google</span>
+  </footer>
+</main>
+
+<script>
+(function () {
+  "use strict";
+
+  var LANGS = [
+    ["EN","English"],["ES","Spanish"],["RU","Russian"],["PT","Portuguese"],["HI","Hindi"],
+    ["DE","German"],["FR","French"],["JA","Japanese"],["KO","Korean"],["AR","Arabic"],
+    ["ZH","Chinese (Mandarin)"],["YUE","Cantonese"],["ID","Indonesian"],["TR","Turkish"],["VI","Vietnamese"],
+    ["TH","Thai"],["FIL","Filipino"],["BN","Bengali"],["TE","Telugu"],["MR","Marathi"],
+    ["TA","Tamil"],["UR","Urdu"],["FA","Persian"],["HE","Hebrew"],["MS","Malay"],
+    ["IT","Italian"],["PL","Polish"],["NL","Dutch"],["SV","Swedish"],["NO","Norwegian"],
+    ["DA","Danish"],["FI","Finnish"],["CS","Czech"],["RO","Romanian"],["HU","Hungarian"],
+    ["UK","Ukrainian"],["EL","Greek"],["BG","Bulgarian"],["HR","Croatian"],["SR","Serbian"],
+    ["SK","Slovak"],["LT","Lithuanian"],["LV","Latvian"],["ET","Estonian"],["CA","Catalan"],
+    ["KK","Kazakh"],["UZ","Uzbek"],["AZ","Azerbaijani"],["KA","Georgian"],["HY","Armenian"],
+    ["SW","Swahili"],["AF","Afrikaans"],["PA","Punjabi"],["GU","Gujarati"],["KN","Kannada"],
+    ["ML","Malayalam"],["SI","Sinhala"],["KM","Khmer"],["MY","Burmese"],["IS","Icelandic"]
+  ];
+
+  var grid = document.getElementById("langGrid");
+  var count = document.getElementById("langCount");
+  var empty = document.getElementById("langEmpty");
+  var emptyQuery = document.getElementById("langEmptyQuery");
+  var input = document.getElementById("langInput");
+
+  function render(filter) {
+    var q = (filter || "").trim().toLowerCase();
+    var matches = q ? LANGS.filter(function (l) { return l[1].toLowerCase().indexOf(q) !== -1; }) : LANGS;
+    grid.innerHTML = "";
+    matches.forEach(function (l) {
+      var chip = document.createElement("span");
+      chip.className = "lang-chip";
+      chip.innerHTML = l[1] + " <b>" + l[0] + "</b>";
+      grid.appendChild(chip);
+    });
+    count.textContent = q ? matches.length + " of 60 languages" : "60 languages supported";
+    empty.style.display = matches.length === 0 ? "block" : "none";
+    grid.style.display = matches.length === 0 ? "none" : "flex";
+    if (matches.length === 0) emptyQuery.textContent = filter;
+  }
+
+  render("");
+  input.addEventListener("input", function () { render(input.value); });
+
+  // Scroll-spy timeline rail
+  var cues = Array.prototype.slice.call(document.querySelectorAll(".cue"));
+  var rail = document.getElementById("rail");
+  var buttons = cues.map(function (sec) {
+    var b = document.createElement("button");
+    b.type = "button";
+    b.title = sec.getAttribute("data-cue");
+    b.addEventListener("click", function () { sec.scrollIntoView({ behavior: "smooth", block: "start" }); });
+    rail.appendChild(b);
+    return b;
+  });
+
+  var io = new IntersectionObserver(function (entries) {
+    entries.forEach(function (entry) {
+      if (!entry.isIntersecting) return;
+      var idx = cues.indexOf(entry.target);
+      buttons.forEach(function (b, i) { b.classList.toggle("active", i === idx); });
+    });
+  }, { rootMargin: "-40% 0px -55% 0px" });
+  cues.forEach(function (sec) { io.observe(sec); });
+})();
+</script>
+</body>
+</html>
