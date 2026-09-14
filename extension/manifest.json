@@ -38,7 +38,7 @@
   "permissions": ["storage", "identity", "activeTab"],
   "host_permissions": [
     "https://www.youtube.com/*",
-    "https://downloadsubtitles.online/*",
+    "https://api.downloadsubtitles.online/*",
     "http://localhost:8787/*"
   ],
   "oauth2": {

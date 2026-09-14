@@ -1,7 +1,11 @@
 import * as esbuild from "esbuild";
-import { cpSync, rmSync, mkdirSync } from "node:fs";
+import { cpSync, rmSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 
 const watch = process.argv.includes("--watch");
+// `--store` strips the manifest "key" field: it pins a stable extension ID
+// for local unpacked loads, but the Chrome Web Store rejects any package
+// that contains it (the store manages the key itself).
+const forStore = process.argv.includes("--store");
 const outdir = "dist";
 
 rmSync(outdir, { recursive: true, force: true });
@@ -37,7 +41,14 @@ const welcomeCtx = await esbuild.context({
 });
 
 function copyStaticFiles() {
-  cpSync("manifest.json", `${outdir}/manifest.json`);
+  if (forStore) {
+    const manifest = JSON.parse(readFileSync("manifest.json", "utf8"));
+    delete manifest.key;
+    writeFileSync(`${outdir}/manifest.json`, JSON.stringify(manifest, null, 2) + "\n");
+    console.log('Store build: removed "key" from manifest');
+  } else {
+    cpSync("manifest.json", `${outdir}/manifest.json`);
+  }
   cpSync("_locales", `${outdir}/_locales`, { recursive: true });
   cpSync("icons", `${outdir}/icons`, { recursive: true });
   cpSync("src/welcome/welcome.html", `${outdir}/welcome.html`);

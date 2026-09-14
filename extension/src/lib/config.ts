@@ -1,4 +1,4 @@
-export const BACKEND_URL = "https://downloadsubtitles.online";
+export const BACKEND_URL = "https://api.downloadsubtitles.online";
 
 // Low-star (1-3) feedback form, opened from the review prompt toast.
 export const FEEDBACK_FORM_URL =
