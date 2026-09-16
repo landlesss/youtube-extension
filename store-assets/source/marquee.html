@@ -1,0 +1,82 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<style>
+  * { box-sizing: border-box; }
+  html, body {
+    margin: 0; padding: 0; width: 1400px; height: 560px; overflow: hidden;
+    font-family: -apple-system, "SF Pro Display", "Segoe UI", system-ui, sans-serif;
+    background: linear-gradient(140deg, #0b1220 0%, #0a1830 55%, #071018 100%);
+  }
+  .stage { position: relative; width: 1400px; height: 560px; }
+  .glow {
+    position: absolute; width: 1000px; height: 1000px; border-radius: 50%;
+    background: radial-gradient(circle, rgba(79,209,197,0.15), transparent 60%);
+    top: -340px; left: 620px;
+  }
+  .kicker {
+    position: absolute; top: 92px; left: 90px;
+    font-family: ui-monospace, "SF Mono", Menlo, monospace;
+    font-size: 15px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: #4fd1c5;
+  }
+  h1 {
+    position: absolute; top: 130px; left: 90px; width: 620px;
+    font-size: 52px; line-height: 1.1; font-weight: 800; color: #f3f6fa; margin: 0; letter-spacing: -0.01em;
+  }
+  p {
+    position: absolute; top: 330px; left: 90px; width: 560px;
+    font-size: 19px; line-height: 1.55; color: #9db3d6; margin: 0;
+  }
+  .cta {
+    position: absolute; top: 440px; left: 90px;
+    display: inline-flex; align-items: center; gap: 10px;
+    background: #4fd1c5; color: #06211e; font-weight: 700; font-size: 16px;
+    padding: 14px 24px; border-radius: 10px;
+  }
+
+  .panel {
+    position: absolute; top: 62px; right: 90px; width: 430px;
+    background: #0f0f0f; border: 1px solid #263a58; border-radius: 16px; padding: 22px;
+    box-shadow: 0 40px 90px -24px rgba(0,0,0,0.65);
+  }
+  .panel-head { display: flex; align-items: center; gap: 10px; margin-bottom: 16px; }
+  .panel-head .sphere {
+    width: 26px; height: 26px; border-radius: 50%; flex: none;
+    background: radial-gradient(circle at 32% 28%, #bfe3ff, transparent 45%), linear-gradient(135deg, #5cb0ff, #17429a 60%, #0a1a3d);
+  }
+  .panel-head span { color: #f1f1f1; font-size: 17px; font-weight: 700; }
+  .row { background: #1a2b3a; border: 1px solid #24384a; border-radius: 10px; padding: 12px 14px; margin-bottom: 10px; }
+  .row .ts { display: block; font-size: 12px; color: #7fb8f0; font-weight: 700; margin-bottom: 4px; }
+  .row .orig { font-size: 15px; color: #e8edf5; }
+  .row .trans { font-size: 15px; color: #4fd1c5; margin-top: 6px; padding-top: 6px; border-top: 1px dashed #2a3450; }
+  .grid { display: flex; gap: 8px; margin-top: 14px; }
+  .cell { flex: 1; background: #182035; border: 1px solid #2a3450; border-radius: 9px; padding: 11px 4px; text-align: center; font-size: 12.5px; color: #9db3d6; font-weight: 600; }
+  .cell.active { border-color: #4fd1c5; background: #1c3d3a; color: #4fd1c5; }
+</style>
+</head>
+<body>
+<div class="stage">
+  <div class="glow"></div>
+  <div class="kicker">YouTube Subtitle Downloader</div>
+  <h1>Every caption, any language.</h1>
+  <p>Download YouTube subtitles as SRT, VTT, or TXT — or translate them into 60 languages, right from the video page.</p>
+  <div class="cta">⬇ Add to Chrome — it's free</div>
+
+  <div class="panel">
+    <div class="panel-head"><span class="sphere"></span><span>Subtitles</span></div>
+    <div class="row">
+      <span class="ts">0:07</span>
+      <div class="orig">If you can master the correct mindset,</div>
+      <div class="trans">Если ты сможешь освоить правильный настрой,</div>
+    </div>
+    <div class="grid">
+      <div class="cell">SRT ▾</div>
+      <div class="cell">Download</div>
+      <div class="cell">Copy</div>
+      <div class="cell active">Translate</div>
+    </div>
+  </div>
+</div>
+</body>
+</html>

@@ -1,0 +1,47 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<style>
+  * { box-sizing: border-box; }
+  html, body {
+    margin: 0; padding: 0; width: 440px; height: 280px; overflow: hidden;
+    font-family: -apple-system, "SF Pro Display", "Segoe UI", system-ui, sans-serif;
+    background: linear-gradient(155deg, #0c1526 0%, #0a1830 60%, #071018 100%);
+  }
+  .stage { position: relative; width: 440px; height: 280px; }
+  .glow {
+    position: absolute; width: 420px; height: 420px; border-radius: 50%;
+    background: radial-gradient(circle, rgba(79,209,197,0.18), transparent 62%);
+    top: -140px; right: -120px;
+  }
+  .sphere {
+    position: absolute; top: 34px; left: 32px; width: 56px; height: 56px; border-radius: 50%;
+    background: radial-gradient(circle at 32% 28%, #bfe3ff, transparent 45%), linear-gradient(135deg, #5cb0ff, #17429a 60%, #0a1a3d);
+    box-shadow: 0 10px 26px -6px rgba(23,66,154,0.7);
+  }
+  h1 {
+    position: absolute; top: 108px; left: 32px; right: 32px;
+    font-size: 27px; line-height: 1.18; font-weight: 800; color: #f3f6fa; margin: 0; letter-spacing: -0.01em;
+  }
+  p {
+    position: absolute; top: 196px; left: 32px; right: 32px;
+    font-size: 14.5px; line-height: 1.45; color: #93a8c8; margin: 0;
+  }
+  .pill {
+    position: absolute; top: 42px; right: 32px;
+    font-family: ui-monospace, monospace; font-size: 12px; font-weight: 700; letter-spacing: 0.02em;
+    color: #7fe9dd; background: #123330; border: 1px solid #1e4b45; padding: 6px 12px; border-radius: 999px;
+  }
+</style>
+</head>
+<body>
+<div class="stage">
+  <div class="glow"></div>
+  <div class="sphere"></div>
+  <div class="pill">60 languages</div>
+  <h1>Download &amp; translate YouTube captions.</h1>
+  <p>SRT, VTT, TXT — original or bilingual, one click.</p>
+</div>
+</body>
+</html>

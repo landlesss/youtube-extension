@@ -1,0 +1,108 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<style>
+  * { box-sizing: border-box; }
+  html, body {
+    margin: 0; padding: 0; width: 1280px; height: 800px; overflow: hidden;
+    font-family: -apple-system, "SF Pro Display", "Segoe UI", system-ui, sans-serif;
+    background: linear-gradient(150deg, #0b1220 0%, #0a1830 55%, #071018 100%);
+  }
+  .stage { position: relative; width: 1280px; height: 800px; }
+  .glow {
+    position: absolute; width: 900px; height: 900px; border-radius: 50%;
+    background: radial-gradient(circle, rgba(79,209,197,0.14), transparent 60%);
+    top: -300px; right: -260px;
+  }
+  .headline { position: absolute; top: 84px; left: 72px; width: 600px; }
+  .kicker {
+    font-family: ui-monospace, "SF Mono", Menlo, monospace;
+    font-size: 14px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase;
+    color: #4fd1c5; margin-bottom: 14px;
+  }
+  .headline h1 { font-size: 44px; line-height: 1.14; font-weight: 800; color: #f3f6fa; margin: 0 0 18px; letter-spacing: -0.01em; }
+  .headline p { font-size: 18px; line-height: 1.6; color: #9db3d6; margin: 0; max-width: 50ch; }
+
+  .card {
+    position: absolute; top: 300px; left: 72px; width: 600px;
+    background: #101a2c; border: 1px solid #223354; border-radius: 16px; padding: 26px;
+    box-shadow: 0 30px 70px -24px rgba(0,0,0,0.6);
+  }
+  .search {
+    display: flex; align-items: center; gap: 10px; background: #182234; border: 1px solid #2a3a56;
+    border-radius: 10px; padding: 12px 16px; margin-bottom: 18px;
+  }
+  .search svg { width: 18px; height: 18px; color: #64748b; }
+  .search .txt { color: #dbe6f5; font-size: 16px; }
+  .search .cursor { display: inline-block; width: 2px; height: 18px; background: #4fd1c5; margin-left: 2px; vertical-align: middle; }
+  .chips { display: flex; flex-wrap: wrap; gap: 9px; }
+  .chip {
+    font-size: 14px; color: #dbe6f5; background: #1c2942; border: 1px solid #2e3f5e;
+    padding: 7px 14px; border-radius: 999px;
+  }
+  .chip.hi { border-color: #4fd1c5; background: #123330; color: #7fe9dd; }
+  .chip b { color: #7f93b3; font-weight: 500; margin-left: 4px; }
+
+  .badge {
+    position: absolute; top: 630px; left: 72px; display: flex; align-items: center; gap: 12px;
+  }
+  .badge .num { font-size: 42px; font-weight: 800; color: #4fd1c5; font-family: ui-monospace, monospace; }
+  .badge .lbl { font-size: 16px; color: #9db3d6; max-width: 22ch; line-height: 1.4; }
+
+  /* Right visual: floating language dots */
+  .orbit { position: absolute; top: 0; right: 0; width: 620px; height: 800px; }
+  .tag {
+    position: absolute; font-size: 15px; font-weight: 600; padding: 9px 16px; border-radius: 999px;
+    background: #101a2c; border: 1px solid #24345470; color: #cfe0f5; box-shadow: 0 14px 30px -12px rgba(0,0,0,0.55);
+  }
+  .tag.on { border-color: #4fd1c5; color: #7fe9dd; background: #0f2523; }
+</style>
+</head>
+<body>
+<div class="stage">
+  <div class="glow"></div>
+
+  <div class="headline">
+    <div class="kicker">60 languages, by name</div>
+    <h1>Search for a language, not a code.</h1>
+    <p>Every language shows up the way you'd actually look for it — in your own display language, from Amharic to Vietnamese.</p>
+  </div>
+
+  <div class="card">
+    <div class="search">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
+      <span class="txt">Nor<span class="cursor"></span></span>
+    </div>
+    <div class="chips">
+      <div class="chip hi">Norwegian <b>NO</b></div>
+      <div class="chip">Korean <b>KO</b></div>
+      <div class="chip">Persian <b>FA</b></div>
+      <div class="chip">Swahili <b>SW</b></div>
+      <div class="chip">Tamil <b>TA</b></div>
+      <div class="chip">Icelandic <b>IS</b></div>
+      <div class="chip">Georgian <b>KA</b></div>
+      <div class="chip">Khmer <b>KM</b></div>
+      <div class="chip">Hindi <b>HI</b></div>
+      <div class="chip">Polish <b>PL</b></div>
+    </div>
+  </div>
+
+  <div class="badge">
+    <span class="num">60</span>
+    <span class="lbl">languages supported, with translated interface names</span>
+  </div>
+
+  <div class="orbit">
+    <div class="tag on" style="top:70px; left:60px;">中文（普通话）</div>
+    <div class="tag" style="top:170px; left:280px;">العربية</div>
+    <div class="tag on" style="top:260px; left:90px;">Русский</div>
+    <div class="tag" style="top:340px; left:330px;">తెలుగు</div>
+    <div class="tag" style="top:420px; left:130px;">日本語</div>
+    <div class="tag on" style="top:500px; left:300px;">Українська</div>
+    <div class="tag" style="top:580px; left:70px;">ગુજરાતી</div>
+    <div class="tag" style="top:660px; left:270px;">Français</div>
+  </div>
+</div>
+</body>
+</html>
