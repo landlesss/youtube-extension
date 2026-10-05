@@ -170,12 +170,12 @@
   <section id="google-data">
     <div class="eyebrow">02</div>
     <h2>Google user data</h2>
-    <p>You sign in with your Google account. We request only the basic sign-in scopes <code>openid</code>, <code>email</code>, and <code>profile</code>, and from them we receive:</p>
-    <ul>
-      <li>your Google email address</li>
-      <li>your Google account ID</li>
-    </ul>
-    <p>We use this solely to recognize your account, keep you signed in, and apply the free plan's daily limit. We do not request access to your Gmail, Google Drive, Calendar, Contacts, or any other Google service, and the extension does not access your YouTube account, subscriptions, watch history, or comments.</p>
+    <p>You sign in with your Google account. We request only the basic sign-in scopes <code>openid</code>, <code>email</code>, and <code>profile</code>.</p>
+    <dl class="field-list">
+      <dt>We read and store</dt><dd>Your Google email address and Google account ID.</dd>
+      <dt>Available, not used</dt><dd>Google's <code>profile</code> scope also makes your name and profile picture available to apps. Our service does not read, store, or display your name or profile picture.</dd>
+    </dl>
+    <p>We use your email address and account ID solely to recognize your account, keep you signed in, and apply the free plan's daily limit. We do not use Google user data to train AI or machine-learning models, and we do not use it to generate images or any other content. We do not request access to your Gmail, Google Drive, Calendar, Contacts, or any other Google service, and the extension does not access your YouTube account, subscriptions, watch history, or comments.</p>
   </section>
 
   <section id="collect">
@@ -221,7 +221,7 @@
     <p>A short, fixed list — no data brokers, no ad exchanges:</p>
     <ul>
       <li><strong>Google</strong> — to verify your identity when you sign in</li>
-      <li><strong>Our translation provider</strong> — receives the subtitle text you ask to translate, solely to return a translation</li>
+      <li><strong>Our translation provider (an LLM-based translation service)</strong> — receives only the subtitle text you ask to translate and the language codes, solely to return a translation. It never receives your Google email address or account ID</li>
       <li><strong>Our hosting and infrastructure providers</strong> — run the servers our service operates on, under standard confidentiality terms</li>
     </ul>
     <p>We may disclose information if required by law, or to protect the security of the service against abuse.</p>
@@ -232,7 +232,7 @@
     <div class="eyebrow">07</div>
     <h2>Google API Services User Data Policy</h2>
     <p>Download Subtitles from YouTube's use and transfer to any other app of information received from Google APIs will adhere to the <a href="https://developers.google.com/terms/api-services-user-data-policy" target="_blank" rel="noopener noreferrer">Google API Services User Data Policy</a>, including the Limited Use requirements.</p>
-    <p>In practice that means: we use Google user data only to provide the sign-in and account features described above; we do not transfer it to others except as needed to provide those features, to comply with law, or to protect the service; we do not use it for advertising; and we do not allow people to read it except with your consent, for security or abuse investigation, or where the law requires.</p>
+    <p>In practice that means: we use Google user data only to provide the sign-in and account features described above; we do not transfer it to others except as needed to provide those features, to comply with law, or to protect the service; we do not use it for advertising; and we do not allow people to read it except with your consent, for security or abuse investigation, or where the law requires. We do not use Google user data to develop, improve, or train generalized AI or machine-learning models.</p>
   </section>
 
   <section id="retention">
