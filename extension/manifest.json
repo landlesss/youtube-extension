@@ -42,7 +42,7 @@
     "http://localhost:8787/*"
   ],
   "oauth2": {
-    "client_id": "580978616059-hlmouccc69gkmml81ouuusi50nd8s175.apps.googleusercontent.com",
+    "client_id": "866034879978-rhocni1ulbh0rc8irkihmvmr0af1ns2m.apps.googleusercontent.com",
     "scopes": ["openid", "email", "profile"]
   },
   "minimum_chrome_version": "116"

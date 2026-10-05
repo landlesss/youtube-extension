@@ -3,8 +3,10 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>YouTube Subtitle Downloader — download, translate, and copy captions</title>
-<meta name="description" content="Chrome extension that downloads, translates, and copies YouTube subtitles in 60 languages. How it works, and the privacy policy.">
+<title>Download Subtitles from YouTube — Chrome extension</title>
+<meta name="description" content="Download Subtitles from YouTube is a Chrome extension that downloads YouTube subtitles as SRT, VTT, or TXT and translates them into 60 languages.">
+<link rel="icon" type="image/png" href="/logo.png">
+<script>if (location.hash === "#privacy") location.replace("/privacy/");</script>
 <style>
   :root {
     --bg: #f7f9fb;
@@ -88,15 +90,7 @@
   }
   .nav-inner { display: flex; align-items: center; justify-content: space-between; padding: 14px 28px; max-width: 980px; margin: 0 auto; }
   .brand { display: flex; align-items: center; gap: 10px; text-decoration: none; }
-  .brand-mark {
-    width: 26px; height: 26px; border-radius: 50%; flex: none;
-    background:
-      radial-gradient(circle at 32% 28%, #bfe3ff, transparent 45%),
-      radial-gradient(circle at 60% 70%, #0a1a3d, transparent 70%),
-      linear-gradient(135deg, #5cb0ff, #17429a 60%, #0a1a3d);
-    box-shadow: inset 0 0 0 1px rgba(255,255,255,0.15);
-  }
-  .brand-name { font-family: var(--font-mono); font-size: 13px; font-weight: 600; letter-spacing: 0.01em; }
+  .brand-name { font-family: var(--font-ui); font-size: 14px; font-weight: 700; letter-spacing: -0.005em; }
   .nav-links { display: flex; align-items: center; gap: 26px; }
   .nav-links a { font-size: 13.5px; color: var(--muted); text-decoration: none; }
   .nav-links a:hover { color: var(--ink); }
@@ -261,36 +255,29 @@
   .cta-band h2 { font-size: 27px; margin-bottom: 10px; }
   .cta-band p { font-family: var(--font-ui); color: var(--muted); margin: 0 0 22px; }
 
-  /* ---------- privacy ---------- */
-  .privacy-head { border-top: 1px solid var(--border); padding-top: 56px; }
-  .privacy-head .cue-meta { color: var(--faint); }
-  .toc {
-    background: var(--surface); border: 1px solid var(--border); border-radius: 10px;
-    padding: 16px 20px; margin: 26px 0 44px;
+  /* ---------- google sign-in explainer ---------- */
+  .why { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  @media (max-width: 760px) { .why { grid-template-columns: 1fr; } }
+  .why-card {
+    background: var(--surface); border: 1px solid var(--border); border-radius: 12px;
+    padding: 18px 18px; box-shadow: var(--shadow);
   }
-  .toc-label { font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--faint); display: block; margin-bottom: 10px; }
-  .toc ol { margin: 0; padding: 0; list-style: none; columns: 2; column-gap: 24px; }
-  .toc li { break-inside: avoid; margin-bottom: 6px; }
-  .toc a { font-size: 13.5px; text-decoration: none; display: flex; gap: 8px; }
-  .toc a:hover { color: var(--accent); }
-  .toc a .n { font-family: var(--font-mono); color: var(--accent); font-size: 12.5px; }
-  @media (max-width: 560px) { .toc ol { columns: 1; } }
+  .why-card h3 { font-size: 16px; margin-bottom: 8px; }
+  .why-card p, .why-card li { font-family: var(--font-ui); font-size: 14px; color: var(--muted); line-height: 1.6; margin: 0; }
+  .why-card ul { margin: 0; padding-left: 18px; }
+  .why-card code { font-family: var(--font-mono); font-size: 12.5px; color: var(--ink); }
+  .why-note { font-family: var(--font-ui); font-size: 14px; color: var(--muted); line-height: 1.6; margin: 18px 0 0; max-width: 70ch; }
+  .why-note a { color: var(--accent); }
 
-  .psec { margin-bottom: 36px; padding-left: 18px; border-left: 2px solid var(--border); scroll-margin-top: 70px; }
-  .psec .eyebrow { font-family: var(--font-mono); font-size: 11.5px; color: var(--accent); margin-bottom: 6px; }
-  .psec h3 { font-size: 19px; margin-bottom: 10px; }
-  .psec p { font-family: Georgia, serif; font-size: 15.5px; line-height: 1.65; max-width: 62ch; margin: 0 0 12px; color: var(--ink); }
-  .psec ul { font-family: Georgia, serif; font-size: 15.5px; line-height: 1.6; max-width: 62ch; margin: 0 0 12px; padding-left: 20px; }
-  .psec li { margin-bottom: 5px; }
-  .field-list {
-    display: grid; grid-template-columns: max-content 1fr; gap: 6px 16px;
-    background: var(--surface); border: 1px solid var(--border); border-radius: 8px;
-    padding: 14px 18px; margin: 0 0 14px; font-family: var(--font-ui); font-size: 14px;
+  .brand-logo { width: 28px; height: 28px; border-radius: 50%; flex: none; display: block; }
+  .tagline { font-family: var(--font-mono); font-size: 12.5px; letter-spacing: 0.04em; color: var(--accent); margin: 0 0 14px; }
+  .footer-links { display: flex; gap: 18px; flex-wrap: wrap; }
+  .footer-links a { color: var(--muted); text-decoration: none; }
+  .footer-links a:hover { color: var(--ink); text-decoration: underline; }
+  @media (max-width: 520px) {
+    .nav-inner { padding: 12px 16px; gap: 10px; }
+    .brand-name { white-space: normal; line-height: 1.2; font-size: 12px; max-width: 150px; }
   }
-  .field-list dt { color: var(--muted); white-space: nowrap; }
-  .field-list dd { margin: 0; }
-  .callout { background: var(--accent-soft); border-radius: 8px; padding: 14px 16px; font-family: var(--font-ui); font-size: 14px; margin: 0 0 14px; }
-  .ph { font-family: var(--font-mono); background: var(--surface-2); border: 1px dashed var(--faint); border-radius: 4px; padding: 1px 6px; color: var(--highlight); font-size: 0.92em; }
 
   footer {
     margin-top: 60px; padding: 26px 0 60px; border-top: 1px solid var(--border);
@@ -304,16 +291,16 @@
 <nav class="nav">
   <div class="nav-inner">
     <a class="brand" href="#top">
-      <span class="brand-mark"></span>
-      <span class="brand-name">yt-subtitles</span>
+      <img class="brand-logo" src="/logo.png" alt="" width="28" height="28">
+      <span class="brand-name">Download Subtitles from YouTube</span>
     </a>
     <div class="nav-links nav-only-desktop">
       <a href="#how">How it works</a>
       <a href="#languages">Languages</a>
       <a href="#formats">Formats</a>
-      <a href="#privacy">Privacy</a>
+      <a href="/privacy/">Privacy</a>
     </div>
-    <a class="nav-cta" href="#get" data-store-link>Add to Chrome</a>
+    <a class="nav-cta" href="https://chromewebstore.google.com/detail/download-subtitles-from-y/cdfknipjkhdcfmbipcifggpgcdhonejp" target="_blank" rel="noopener noreferrer" data-store-link>Add to Chrome</a>
   </div>
 </nav>
 
@@ -329,19 +316,20 @@
     </div>
     <div class="hero">
       <div>
-        <h1>Every caption,<br>any language.</h1>
-        <p class="lede">Download YouTube subtitles as SRT, VTT, or plain text — or translate them into any of 60 languages first, right from the video page. No account required to try it.</p>
+        <p class="tagline">Every caption, any language.</p>
+        <h1>Download Subtitles from YouTube</h1>
+        <p class="lede">A Chrome extension that downloads YouTube subtitles as SRT, VTT, or TXT — or translates them into any of 60 languages first, right from the video page. Preview captions without an account; sign in with Google to download, copy, or translate.</p>
         <div class="cta-row">
-          <a class="btn-primary" href="#get" data-store-link>⬇ Add to Chrome — it's free</a>
+          <a class="btn-primary" href="https://chromewebstore.google.com/detail/download-subtitles-from-y/cdfknipjkhdcfmbipcifggpgcdhonejp" target="_blank" rel="noopener noreferrer" data-store-link>⬇ Add to Chrome — it's free</a>
           <a class="btn-ghost" href="#how">See how it works</a>
         </div>
-        <div class="hero-note"><span class="stars">★★★★★</span>&nbsp; rated by early users on the Chrome Web Store</div>
+        <div class="hero-note">Free plan &middot; works on youtube.com &middot; 60 languages</div>
       </div>
       <div class="stage" aria-hidden="true">
         <div class="stage-video"></div>
         <div class="stage-caption">Всё в твоей жизни создаётся твоими мыслями</div>
         <div class="panel-mock">
-          <div class="panel-mock-head"><span class="dot"></span> Subtitles</div>
+          <div class="panel-mock-head"><img class="dot" src="/logo.png" alt=""> Subtitles</div>
           <div class="panel-mock-row">
             <span class="panel-mock-ts">0:07</span>
             <div class="panel-mock-orig">If you can master the correct mindset,</div>
@@ -434,147 +422,50 @@
     </div>
   </section>
 
-  <!-- CUE 005 — CTA -->
-  <section class="cue" id="get" data-cue="Get the extension">
+  <!-- CUE 005 — GOOGLE SIGN-IN -->
+  <section class="cue" id="signin" data-cue="Google sign-in">
     <div class="cue-meta">
       <span class="cue-num">005</span>
-      <span class="cue-time">00:00:40,000&nbsp;→&nbsp;00:00:46,000</span>
+      <span class="cue-time">00:00:40,000&nbsp;→&nbsp;00:00:48,000</span>
+    </div>
+    <h2 style="font-size:27px; margin-bottom:8px;">Why sign in with Google?</h2>
+    <p class="why-note" style="margin:0 0 22px;">Download Subtitles from YouTube asks you to sign in with Google before you download, copy, or translate subtitles. That is the only thing Google sign-in is used for.</p>
+    <div class="why">
+      <div class="why-card">
+        <h3>What we ask Google for</h3>
+        <ul>
+          <li>Your email address</li>
+          <li>Your Google account ID</li>
+          <li>Your basic profile (<code>openid</code>, <code>email</code>, <code>profile</code> scopes)</li>
+        </ul>
+      </div>
+      <div class="why-card">
+        <h3>Why we need it</h3>
+        <p>To recognize your account and apply the free plan's daily limit. We never read your Gmail, Drive, Calendar, or any other Google data, and we don't access your YouTube account — captions are read from the video page you have open.</p>
+      </div>
+    </div>
+    <p class="why-note">Full details are in the <a href="/privacy/">Privacy Policy</a>. You can revoke access at any time from your <a href="https://myaccount.google.com/permissions" target="_blank" rel="noopener noreferrer">Google Account permissions page</a>.</p>
+  </section>
+
+  <!-- CUE 006 — CTA -->
+  <section class="cue" id="get" data-cue="Get the extension">
+    <div class="cue-meta">
+      <span class="cue-num">006</span>
+      <span class="cue-time">00:00:48,000&nbsp;→&nbsp;00:00:54,000</span>
     </div>
     <div class="cta-band">
       <h2>Get it in about ten seconds.</h2>
       <p>Free to install. Sign in with Google only when you're ready to download, copy, or translate.</p>
-      <a class="btn-primary" href="#" data-store-link>⬇ Add to Chrome</a>
-    </div>
-  </section>
-
-  <!-- PRIVACY -->
-  <section class="privacy-head cue" id="privacy" data-cue="Privacy">
-    <div class="cue-meta">
-      <span class="cue-num">006</span>
-      <span class="cue-time">closing&nbsp;reel&nbsp;→&nbsp;the&nbsp;fine&nbsp;print</span>
-    </div>
-    <h2 style="font-size:30px;">Privacy Policy</h2>
-    <p style="font-family:Georgia, serif; color:var(--muted); font-size:16px; max-width:54ch; margin:14px 0 0; line-height:1.6;">
-      YouTube Subtitle Downloader extracts, translates, and downloads YouTube captions. This section explains exactly what data that involves, in plain terms.
-    </p>
-
-    <nav class="toc" aria-label="Table of contents">
-      <span class="toc-label">Contents</span>
-      <ol>
-        <li><a href="#p-overview"><span class="n">01</span> Overview</a></li>
-        <li><a href="#p-collect"><span class="n">02</span> What we collect</a></li>
-        <li><a href="#p-not-collect"><span class="n">03</span> What we don't collect</a></li>
-        <li><a href="#p-use"><span class="n">04</span> How we use it</a></li>
-        <li><a href="#p-share"><span class="n">05</span> Who we share it with</a></li>
-        <li><a href="#p-retention"><span class="n">06</span> Retention</a></li>
-        <li><a href="#p-security"><span class="n">07</span> Security</a></li>
-        <li><a href="#p-choices"><span class="n">08</span> Your choices</a></li>
-        <li><a href="#p-children"><span class="n">09</span> Children</a></li>
-        <li><a href="#p-changes"><span class="n">10</span> Changes</a></li>
-        <li><a href="#p-contact"><span class="n">11</span> Contact</a></li>
-      </ol>
-    </nav>
-
-    <div class="psec" id="p-overview">
-      <div class="eyebrow">01</div>
-      <h3>Overview</h3>
-      <p>YouTube Subtitle Downloader ("the extension", "we") lets you download, copy, and translate subtitles from YouTube videos. Subtitle extraction happens locally in your browser. Signing in and translation involve our backend service at <strong>downloadsubtitles.online</strong> ("the service"). This policy covers both.</p>
-    </div>
-
-    <div class="psec" id="p-collect">
-      <div class="eyebrow">02</div>
-      <h3>What we collect</h3>
-      <p>Only what's needed to run the features you actually use:</p>
-      <dl class="field-list">
-        <dt>Account</dt><dd>Your Google email address and Google account ID, obtained when you sign in with Google.</dd>
-        <dt>Subtitle text</dt><dd>The caption lines of a video, sent to our service only when you use the Translate feature.</dd>
-        <dt>Video ID</dt><dd>The YouTube video's ID, sent when you download, copy, or translate — used to enforce the daily free-plan limit per video.</dd>
-        <dt>Usage</dt><dd>Download/translation counts and character usage tied to your account, for plan limits and billing.</dd>
-        <dt>Local prefs</dt><dd>Your session token and a one-time "rate us" flag, stored only in your browser via <code>chrome.storage.local</code>.</dd>
-      </dl>
-      <p>Downloading or copying subtitles <strong>without</strong> translation does not send the subtitle text itself to our service — it's extracted and written to a file entirely on your device. Signing in is still required so the daily video limit can be enforced.</p>
-    </div>
-
-    <div class="psec" id="p-not-collect">
-      <div class="eyebrow">03</div>
-      <h3>What we don't collect</h3>
-      <ul>
-        <li>No browsing history beyond the specific video you act on</li>
-        <li>No advertising identifiers, no ad network, no third-party analytics/tracking pixels</li>
-        <li>No payment card details (handled entirely by our payment processor if you upgrade — we never see or store card numbers)</li>
-        <li>We never sell or rent your data to anyone</li>
-      </ul>
-    </div>
-
-    <div class="psec" id="p-use">
-      <div class="eyebrow">04</div>
-      <h3>How we use it</h3>
-      <ul>
-        <li>To authenticate you and keep your session signed in</li>
-        <li>To enforce the free-plan daily limit and your character quota</li>
-        <li>To generate translations via our translation provider</li>
-        <li>To diagnose and fix bugs (e.g. failed translation requests)</li>
-      </ul>
-    </div>
-
-    <div class="psec" id="p-share">
-      <div class="eyebrow">05</div>
-      <h3>Who we share it with</h3>
-      <p>A short, fixed list — no data brokers, no ad exchanges:</p>
-      <ul>
-        <li><strong>Google</strong> — to verify your identity when you sign in</li>
-        <li><strong>Our translation provider</strong> — receives the subtitle text you ask to translate, solely to return a translation</li>
-        <li><strong>Our hosting/infrastructure providers</strong> — run the servers our service operates on, under standard confidentiality terms</li>
-      </ul>
-      <p>We may disclose information if required by law, or to protect the security of the service against abuse.</p>
-      <div class="callout">If you rate the extension 4-5 stars, we open the Chrome Web Store review page. If you rate it 1-3 stars, we open a Google Form instead, so we can follow up on feedback privately rather than it becoming a public review. Either way this is a link you choose to click — we don't submit anything on your behalf. If you fill out the feedback form, we can see what you submit there; the form itself is hosted and operated by Google under <a href="https://policies.google.com/privacy" target="_blank" rel="noopener noreferrer">Google's own privacy policy</a>.</div>
-    </div>
-
-    <div class="psec" id="p-retention">
-      <div class="eyebrow">06</div>
-      <h3>Retention</h3>
-      <p>We keep your account data for as long as your account is active. If you ask us to delete your account (see <a href="#p-contact">Contact</a>), we delete your account record and stop retaining new usage data going forward. Subtitle text sent for translation is processed to return a result and is not kept longer than necessary to do that and to prevent abuse of the service.</p>
-    </div>
-
-    <div class="psec" id="p-security">
-      <div class="eyebrow">07</div>
-      <h3>Security</h3>
-      <p>All traffic between the extension and our service is encrypted in transit (HTTPS). Access to account data is limited to what's needed to operate the service. No method of transmission or storage is 100% secure, and we can't guarantee absolute security — but we don't treat that as an excuse not to take reasonable precautions.</p>
-    </div>
-
-    <div class="psec" id="p-choices">
-      <div class="eyebrow">08</div>
-      <h3>Your choices</h3>
-      <ul>
-        <li><strong>Sign out</strong> any time from the extension panel — this clears your local session</li>
-        <li><strong>Revoke access</strong> from your <a href="https://myaccount.google.com/permissions" target="_blank" rel="noopener noreferrer">Google Account permissions page</a> at any time</li>
-        <li><strong>Delete your account</strong> by contacting us (see below) — we'll remove your account record</li>
-        <li><strong>Uninstall</strong> the extension at any time from <code>chrome://extensions</code>, which also clears all local data it stored</li>
-      </ul>
-    </div>
-
-    <div class="psec" id="p-children">
-      <div class="eyebrow">09</div>
-      <h3>Children</h3>
-      <p>This extension is not directed at children under 13, and we don't knowingly collect data from them.</p>
-    </div>
-
-    <div class="psec" id="p-changes">
-      <div class="eyebrow">10</div>
-      <h3>Changes to this policy</h3>
-      <p>If we make material changes, we'll update the "last updated" date below and, where appropriate, note it in the extension's release notes.</p>
-      <div class="callout">Last updated: 25 August 2026</div>
-    </div>
-
-    <div class="psec" id="p-contact" style="margin-bottom:0;">
-      <div class="eyebrow">11</div>
-      <h3>Contact</h3>
-      <p>Questions, deletion requests, or anything else about this policy — reach us at <a href="mailto:supportdownloadsubtitles@gmail.com">supportdownloadsubtitles@gmail.com</a>.</p>
+      <a class="btn-primary" href="https://chromewebstore.google.com/detail/download-subtitles-from-y/cdfknipjkhdcfmbipcifggpgcdhonejp" target="_blank" rel="noopener noreferrer" data-store-link>⬇ Add to Chrome</a>
     </div>
   </section>
 
   <footer>
-    <span>YouTube Subtitle Downloader</span>
+    <span>Download Subtitles from YouTube</span>
+    <nav class="footer-links" aria-label="Footer">
+      <a href="/privacy/">Privacy Policy</a>
+      <a href="mailto:supportdownloadsubtitles@gmail.com">supportdownloadsubtitles@gmail.com</a>
+    </nav>
     <span>Not affiliated with YouTube or Google</span>
   </footer>
 </main>
