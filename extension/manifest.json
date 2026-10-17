@@ -3,7 +3,7 @@
   "key": "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAqhQKZI29f+pmz+dSscApPlVrrTW6BcJjp9EWsNx/PkpOa6VCaE/wlXVPYa72usxxPvgsOZ30G5cNz1t2VZauGbZQWY4J86X9A35PfS44iqYYiN9C/n2FQlOPjjy4d/UNWR9yhnxmTPBsb1lsS3F0Kxwbp4vBHVKJh67Qn3gQQIVPuADAishegJxh2jxfBOyu8YEurhEDiu4s3t5yYniP2pnSUDnQQBWzs62Q2iiADK1v/XzFirg/rsZZ+xxWIX3c7gK+k1+g1GJwBAhXWVyZw0ijf5ZejnGZBOPwmD0V5FXg0D9NXeKUoB7NVj0JjKGK19ZIr1hQsCe8yY/Dn1z+OQIDAQAB",
   "name": "__MSG_extName__",
   "description": "__MSG_extDescription__",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "default_locale": "en",
   "icons": {
     "16": "icons/icon16.png",

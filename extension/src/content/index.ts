@@ -3,7 +3,7 @@ import { fetchCuesFromPanel } from "../lib/transcriptPanel";
 import { downloadTextFile } from "../lib/download";
 import { claimVideoAccess, getMe, getSession, login, translateAllCues } from "../lib/api";
 import { t } from "../lib/i18n";
-import { recordDownloadAndMaybeShowReviewPrompt } from "../lib/reviewPrompt";
+import { recordActionAndMaybeShowReviewPrompt } from "../lib/reviewPrompt";
 import { SubtitlePanel } from "./ui";
 import type { CaptionTrack, Cue, Quota, Session, SubtitleFormat } from "../types";
 
@@ -18,8 +18,10 @@ function getPageTitle(): string {
   return document.title.replace(/ - YouTube$/, "").trim() || "subtitles";
 }
 
-async function notifyDownloadCompleted(): Promise<void> {
-  const shouldShowReviewPrompt = await recordDownloadAndMaybeShowReviewPrompt();
+// Any successful download, copy, or translate counts as one use — counting
+// only downloads meant people who mostly copy or translate never got asked.
+async function notifyActionCompleted(): Promise<void> {
+  const shouldShowReviewPrompt = await recordActionAndMaybeShowReviewPrompt();
   if (shouldShowReviewPrompt) ensurePanel().showReviewToast();
 }
 
@@ -48,13 +50,14 @@ function ensurePanel(): SubtitlePanel {
       ensurePanel().updateQuota(quota);
       const content = serializeCues(cues, format);
       downloadTextFile(`${sanitizeFilename(getPageTitle())}.${suffix}.${format}`, content);
-      void notifyDownloadCompleted();
+      void notifyActionCompleted();
     },
     onCopy: async (cues: Cue[], format: SubtitleFormat) => {
       const { quota } = await requireVideoAccess();
       ensurePanel().updateQuota(quota);
       const content = serializeCues(cues, format);
       await navigator.clipboard.writeText(content);
+      void notifyActionCompleted();
     },
     onTranslate: async (track: CaptionTrack, targetLang: string) => {
       const { videoId, session, quota } = await requireVideoAccess();
@@ -68,6 +71,7 @@ function ensurePanel(): SubtitlePanel {
         session,
       );
       ensurePanel().updateQuota(translateQuota);
+      void notifyActionCompleted();
       return { original: cues, translated };
     },
     onLoadTranscript: async (track: CaptionTrack) => getCleanCues(track),
