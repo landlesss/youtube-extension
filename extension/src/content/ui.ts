@@ -419,46 +419,56 @@ export class SubtitlePanel {
       }
       .review-toast {
         position: fixed;
-        bottom: 16px;
-        right: 16px;
-        max-width: 280px;
-        background: #1f1f1f;
+        bottom: 24px;
+        right: 24px;
+        width: 360px;
+        max-width: calc(100vw - 32px);
+        background: #14202e;
         color: #f1f1f1;
-        border: 1px solid #303030;
-        border-radius: 10px;
-        padding: 12px 32px 12px 12px;
-        font-size: 13px;
-        line-height: 1.4;
-        box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+        border: 2px solid #4fd1c5;
+        border-radius: 16px;
+        padding: 24px 52px 24px 24px;
+        font-size: 20px;
+        font-weight: 700;
+        line-height: 1.3;
+        box-shadow: 0 12px 48px rgba(0,0,0,0.65), 0 0 0 6px rgba(79,209,197,0.18);
         z-index: 2147483647;
         display: flex;
         flex-direction: column;
-        gap: 8px;
+        gap: 16px;
+        animation: yt-subs-toast-in 0.35s ease-out;
       }
-      .star-row { display: flex; gap: 4px; }
+      @keyframes yt-subs-toast-in {
+        from { opacity: 0; transform: translateY(20px); }
+        to { opacity: 1; transform: none; }
+      }
+      @media (prefers-reduced-motion: reduce) {
+        .review-toast { animation: none; }
+      }
+      .star-row { display: flex; gap: 6px; }
       .star-btn {
         width: auto;
         margin: 0;
-        padding: 0;
+        padding: 0 2px;
         background: transparent;
         border: none;
-        color: #555;
-        font-size: 22px;
+        color: #5b6b80;
+        font-size: 44px;
         line-height: 1;
         cursor: pointer;
       }
       .star-btn.lit { color: #f5c518; }
       .review-toast-close {
         position: absolute;
-        top: 4px;
-        right: 6px;
+        top: 12px;
+        right: 14px;
         width: auto;
         margin: 0;
-        padding: 2px 6px;
+        padding: 4px 8px;
         background: transparent;
         border: none;
         color: #aaa;
-        font-size: 15px;
+        font-size: 28px;
         line-height: 1;
       }
       .review-toast-close:hover { color: #f1f1f1; }
@@ -612,12 +622,14 @@ export class SubtitlePanel {
     closeBtn.type = "button";
     closeBtn.className = "review-toast-close";
     closeBtn.textContent = "×";
+    closeBtn.title = t("closeButton");
+    closeBtn.setAttribute("aria-label", t("closeButton"));
     closeBtn.addEventListener("click", () => toast.remove());
 
     toast.append(text, starRow, closeBtn);
     this.shadow.appendChild(toast);
-
-    setTimeout(() => toast.remove(), 15000);
+    // Deliberately no auto-dismiss: this appears only once, ever, so a timer
+    // meant most people never noticed it. It stays until rated or closed.
   }
 
   private renderHeader(): void {
