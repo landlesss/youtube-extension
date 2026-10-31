@@ -108,3 +108,11 @@ Until `docs/uninstall/` is published at `https://downloadsubtitles.online/uninst
 `UNINSTALL_FEEDBACK_URL` deliberately points to the already-live Google Form.
 After deployment, change it to `UNINSTALL_FEEDBACK_PAGE_URL` and rebuild.
 Browser check: `node e2e/uninstall-feedback.mjs` intercepts submission locally.
+
+Version 0.2.2 adds a looping motion tutorial: simulated cursor/click, player zoom,
+side-panel reveal, transcript follow-along, export menu and replay. Intro and
+scroll reveals respect reduced motion; celebration is restricted to the install
+welcome page. `node e2e/onboarding-motion.mjs` verifies and records the sequence
+(default output `/tmp/yt-onboarding-motion`, configurable with `YT_PREVIEW_DIR`).
+After building, `python3 extension/tools/package_release.py` creates test and
+store ZIPs under `releases/` using the current manifest version.

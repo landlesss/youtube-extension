@@ -1,0 +1,34 @@
+import { chromium } from 'playwright';
+import assert from 'node:assert/strict';
+import path from 'node:path';
+import { mkdir, copyFile } from 'node:fs/promises';
+const output = process.env.YT_PREVIEW_DIR || '/tmp/yt-onboarding-motion';
+await mkdir(output, { recursive: true });
+const browser = await chromium.launch({ headless: true });
+try {
+  const context = await browser.newContext({ viewport: { width: 1280, height: 960 }, recordVideo: { dir: '/tmp/yt-animation-preview', size: { width: 1280, height: 960 } } });
+  const page = await context.newPage();
+  await page.goto(`file://${path.resolve(import.meta.dirname, '../extension/dist/welcome.html')}`);
+  await page.waitForTimeout(1200);
+  assert.equal(await page.locator('.demo-browser').getAttribute('data-step'), '0');
+  assert.equal(await page.locator('.demo-panel').evaluate(el => getComputedStyle(el).opacity), '0');
+  await page.locator('.showcase').scrollIntoViewIfNeeded();
+  await page.waitForTimeout(1200);
+  assert.equal(await page.locator('.demo-browser').evaluate(el => el.classList.contains('demo-clicked')), true);
+  await page.screenshot({ path: path.join(output, 'motion-player.png') });
+  await page.waitForFunction(() => document.querySelector('.demo-browser').dataset.step === '1');
+  await page.waitForTimeout(2000);
+  assert.equal(await page.locator('.demo-panel').evaluate(el => getComputedStyle(el).opacity), '1');
+  assert.ok((await page.locator('.caption').first().evaluate(el => getComputedStyle(el).transform)) !== 'none');
+  await page.screenshot({ path: path.join(output, 'motion-panel.png') });
+  await page.waitForFunction(() => document.querySelector('.demo-browser').dataset.step === '2');
+  await page.waitForTimeout(2300);
+  assert.equal(await page.locator('.demo-export').evaluate(el => getComputedStyle(el).opacity), '1');
+  await page.screenshot({ path: path.join(output, 'motion-export.png') });
+  await page.getByRole('button', { name: 'Replay animation' }).click();
+  assert.equal(await page.locator('.demo-browser').getAttribute('data-step'), '0');
+  await page.waitForTimeout(1000);
+  await context.close();
+  await copyFile(await page.video().path(), path.join(output, 'welcome-motion.webm'));
+  console.log('Motion passed: click, panel reveal, caption motion, export, replay. Preview saved.');
+} finally { await browser.close(); }
