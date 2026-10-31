@@ -356,5 +356,20 @@
   },
   "langName_IS": {
     "message": "Icelandic"
+  },
+  "newVideoDetected": {
+    "message": "New video detected"
+  },
+  "newVideoHint": {
+    "message": "Load subtitles when you are ready."
+  },
+  "loadVideoButton": {
+    "message": "Load subtitles"
+  },
+  "optionalGoogleLink": {
+    "message": "Link Google account (optional)"
+  },
+  "openSubtitlePanel": {
+    "message": "Open subtitle translator"
   }
 }

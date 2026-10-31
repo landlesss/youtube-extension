@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Privacy Policy — Download Subtitles from YouTube</title>
-<meta name="description" content="Privacy Policy for Download Subtitles from YouTube, a Chrome extension that downloads and translates YouTube subtitles. What Google data we use, why, and how to delete it.">
+<meta name="description" content="Privacy Policy for Download Subtitles from YouTube, a Chrome extension that downloads and translates YouTube subtitles. Anonymous sessions, subtitle processing and optional feedback.">
 <link rel="icon" type="image/png" href="/logo.png">
 <style>
   :root {
@@ -70,7 +70,7 @@
   .nav { border-bottom: 1px solid var(--border); }
   .nav-inner { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 14px 28px; max-width: 760px; margin: 0 auto; }
   .brand { display: flex; align-items: center; gap: 10px; text-decoration: none; color: var(--ink); }
-  .brand img { width: 28px; height: 28px; border-radius: 50%; display: block; flex: none; }
+  .brand img { width: 28px; height: 28px; border-radius: 0; display: block; flex: none; }
   .brand span { font-size: 14px; font-weight: 700; letter-spacing: -0.005em; }
   .back { font-size: 13.5px; color: var(--muted); text-decoration: none; white-space: nowrap; }
   .back:hover { color: var(--ink); }
@@ -140,18 +140,18 @@
 <main class="page">
   <h1>Privacy Policy</h1>
   <div class="meta">Last updated: 5 October 2026</div>
-  <p class="lede">Download Subtitles from YouTube is a Chrome extension that downloads, copies, and translates YouTube subtitles. This page explains exactly what data that involves — what we receive from Google, why, who it's shared with, and how you can have it deleted.</p>
+  <p class="lede">Download Subtitles from YouTube is a Chrome extension that downloads, copies, and translates YouTube subtitles. This page explains exactly what data that involves — anonymous sessions, subtitle processing, optional feedback and deletion requests.</p>
 
   <nav class="toc" aria-label="Table of contents">
     <span class="toc-label">Contents</span>
     <ol>
       <li><a href="#overview"><span class="n">01</span> Overview</a></li>
-      <li><a href="#google-data"><span class="n">02</span> Google user data</a></li>
+      <li><a href="#google-data"><span class="n">02</span> Anonymous sessions</a></li>
       <li><a href="#collect"><span class="n">03</span> What we collect</a></li>
       <li><a href="#not-collect"><span class="n">04</span> What we don't collect</a></li>
       <li><a href="#use"><span class="n">05</span> How we use it</a></li>
       <li><a href="#share"><span class="n">06</span> Who we share it with</a></li>
-      <li><a href="#limited-use"><span class="n">07</span> Google API Services policy</a></li>
+      <li><a href="#limited-use"><span class="n">07</span> Account access</a></li>
       <li><a href="#retention"><span class="n">08</span> Retention</a></li>
       <li><a href="#security"><span class="n">09</span> Security</a></li>
       <li><a href="#choices"><span class="n">10</span> Your choices &amp; deletion</a></li>
@@ -164,18 +164,14 @@
   <section id="overview">
     <div class="eyebrow">01</div>
     <h2>Overview</h2>
-    <p>Download Subtitles from YouTube ("the extension", "we") lets you download, copy, and translate subtitles from YouTube videos. Subtitle extraction happens locally in your browser: the extension reads the captions shown on the YouTube page you have open. Signing in and translation involve our backend service at <strong>api.downloadsubtitles.online</strong> ("the service"). This policy covers both the extension and the service, and the website at downloadsubtitles.online.</p>
+    <p>Download Subtitles from YouTube ("the extension", "we") lets you download, copy, and translate subtitles from YouTube videos. Subtitle extraction happens locally in your browser: the extension reads the captions shown on the YouTube page you have open. Anonymous sessions and translation involve our backend service at <strong>api.downloadsubtitles.online</strong> ("the service"). This policy covers both the extension and the service, and the website at downloadsubtitles.online.</p>
   </section>
 
   <section id="google-data">
     <div class="eyebrow">02</div>
-    <h2>Google user data</h2>
-    <p>You sign in with your Google account. We request only the basic sign-in scopes <code>openid</code>, <code>email</code>, and <code>profile</code>.</p>
-    <dl class="field-list">
-      <dt>We read and store</dt><dd>Your Google email address and Google account ID.</dd>
-      <dt>Available, not used</dt><dd>Google's <code>profile</code> scope also makes your name and profile picture available to apps. Our service does not read, store, or display your name or profile picture.</dd>
-    </dl>
-    <p>We use your email address and account ID solely to recognize your account, keep you signed in, and apply the free plan's daily limit. We do not use Google user data to train AI or machine-learning models, and we do not use it to generate images or any other content. We do not request access to your Gmail, Google Drive, Calendar, Contacts, or any other Google service, and the extension does not access your YouTube account, subscriptions, watch history, or comments.</p>
+    <h2>Anonymous sessions</h2>
+    <p>The current extension works without Google sign-in. Our service creates an anonymous session for this browser installation. Its JWT and rotating refresh secret are stored in <code>chrome.storage.local</code> and used to apply usage limits. The extension no longer requests Google OAuth permissions or links Google accounts.</p>
+    <p>Existing Google sessions are replaced with an anonymous session when this version initializes. Previously collected account data, if any, can be addressed through a deletion request using the contact details below.</p>
   </section>
 
   <section id="collect">
@@ -183,13 +179,13 @@
     <h2>What we collect</h2>
     <p>Only what's needed to run the features you actually use:</p>
     <dl class="field-list">
-      <dt>Account</dt><dd>Your Google email address and Google account ID, obtained when you sign in with Google.</dd>
+      <dt>Account</dt><dd>An anonymous server-issued identity for this browser installation.</dd>
       <dt>Subtitle text</dt><dd>The caption lines of a video, sent to our service only when you use the Translate feature.</dd>
       <dt>Video ID</dt><dd>The YouTube video's ID, sent when you download, copy, or translate — used to enforce the daily free-plan limit per video.</dd>
       <dt>Usage</dt><dd>Download and translation counts and character usage tied to your account, for plan limits.</dd>
-      <dt>Local prefs</dt><dd>Your session token and a one-time "rate us" flag, stored only in your browser via <code>chrome.storage.local</code>.</dd>
+      <dt>Local prefs</dt><dd>Your session JWT, rotating refresh secret and a one-time "rate us" flag, stored only in your browser via <code>chrome.storage.local</code>.</dd>
     </dl>
-    <p>Downloading or copying subtitles <strong>without</strong> translation does not send the subtitle text itself to our service — it's extracted and written to a file entirely on your device. Signing in is still required so the daily video limit can be enforced.</p>
+    <p>Downloading or copying subtitles <strong>without</strong> translation does not send the subtitle text itself to our service — it's extracted and written to a file entirely on your device. The anonymous session enforces the daily video limit without a sign-in step.</p>
   </section>
 
   <section id="not-collect">
@@ -208,7 +204,7 @@
     <div class="eyebrow">05</div>
     <h2>How we use it</h2>
     <ul>
-      <li>To authenticate you and keep your session signed in</li>
+      <li>To maintain the anonymous session for this installation</li>
       <li>To enforce the free-plan daily limit and your character quota</li>
       <li>To generate translations via our translation provider</li>
       <li>To diagnose and fix bugs (for example, failed translation requests)</li>
@@ -220,7 +216,6 @@
     <h2>Who we share it with</h2>
     <p>A short, fixed list — no data brokers, no ad exchanges:</p>
     <ul>
-      <li><strong>Google</strong> — to verify your identity when you sign in</li>
       <li><strong>Our translation provider (an LLM-based translation service)</strong> — receives only the subtitle text you ask to translate and the language codes, solely to return a translation. It never receives your Google email address or account ID</li>
       <li><strong>Our hosting and infrastructure providers</strong> — run the servers our service operates on, under standard confidentiality terms</li>
     </ul>
@@ -230,9 +225,8 @@
 
   <section id="limited-use">
     <div class="eyebrow">07</div>
-    <h2>Google API Services User Data Policy</h2>
-    <p>Download Subtitles from YouTube's use and transfer to any other app of information received from Google APIs will adhere to the <a href="https://developers.google.com/terms/api-services-user-data-policy" target="_blank" rel="noopener noreferrer">Google API Services User Data Policy</a>, including the Limited Use requirements.</p>
-    <p>In practice that means: we use Google user data only to provide the sign-in and account features described above; we do not transfer it to others except as needed to provide those features, to comply with law, or to protect the service; we do not use it for advertising; and we do not allow people to read it except with your consent, for security or abuse investigation, or where the law requires. We do not use Google user data to develop, improve, or train generalized AI or machine-learning models.</p>
+    <h2>Account access</h2>
+    <p>The current extension does not use Google OAuth, request Google account permissions or offer account linking. Optional feedback is collected through Google Forms; the selected reason, comment and optional reply email are sent only when you submit the form.</p>
   </section>
 
   <section id="retention">

@@ -1,135 +1,108 @@
-import { cleanupCues, fetchCaptionTracks, getVideoId, serializeCues } from "../lib/youtube";
+import { cleanupCues, fetchCaptionTracks, getVideoId } from "../lib/youtube";
 import { fetchCuesFromPanel } from "../lib/transcriptPanel";
-import { downloadTextFile } from "../lib/download";
-import { claimVideoAccess, getMe, getSession, login, translateAllCues } from "../lib/api";
-import { t } from "../lib/i18n";
-import { recordActionAndMaybeShowReviewPrompt } from "../lib/reviewPrompt";
-import { SubtitlePanel } from "./ui";
-import type { CaptionTrack, Cue, Quota, Session, SubtitleFormat } from "../types";
 
-let panel: SubtitlePanel | null = null;
-let loadedVideoId: string | null = null;
-
-function sanitizeFilename(name: string): string {
-  return name.replace(/[\\/:*?"<>|]/g, "_").slice(0, 80);
+const state = () => ({ videoId: getVideoId(location.href), title: document.title.replace(/ - YouTube$/, "").trim() });
+let currentVideoId = state().videoId;
+function notifyNavigation(): void {
+  const next = state();
+  if (next.videoId === currentVideoId) return;
+  currentVideoId = next.videoId;
+  void chrome.runtime.sendMessage({ type: "VIDEO_CHANGED", ...next }).catch(() => {});
 }
+document.addEventListener("yt-navigate-finish", notifyNavigation);
+window.addEventListener("popstate", notifyNavigation);
 
-function getPageTitle(): string {
-  return document.title.replace(/ - YouTube$/, "").trim() || "subtitles";
-}
-
-// Any successful download, copy, or translate counts as one use — counting
-// only downloads meant people who mostly copy or translate never got asked.
-async function notifyActionCompleted(): Promise<void> {
-  const shouldShowReviewPrompt = await recordActionAndMaybeShowReviewPrompt();
-  if (shouldShowReviewPrompt) ensurePanel().showReviewToast();
-}
-
-async function getCleanCues(track: CaptionTrack): Promise<Cue[]> {
-  return cleanupCues(await fetchCuesFromPanel(track));
-}
-
-// Claims today's per-video slot on the backend. Every download/copy/translate
-// action must call this first — it's what the backend uses to enforce the
-// daily video quota, and it requires a signed-in session (unlike just
-// previewing the transcript, which stays available while signed out).
-async function requireVideoAccess(): Promise<{ videoId: string; session: Session; quota: Quota }> {
-  const session = await getSession();
-  if (!session) throw new Error(t("notSignedInError"));
-  const videoId = getVideoId(location.href);
-  if (!videoId) throw new Error(t("error"));
-  const quota = await claimVideoAccess(videoId, session);
-  return { videoId, session, quota };
-}
-
-function ensurePanel(): SubtitlePanel {
-  if (panel) return panel;
-  panel = new SubtitlePanel({
-    onDownload: async (cues: Cue[], format: SubtitleFormat, suffix: string) => {
-      const { quota } = await requireVideoAccess();
-      ensurePanel().updateQuota(quota);
-      const content = serializeCues(cues, format);
-      downloadTextFile(`${sanitizeFilename(getPageTitle())}.${suffix}.${format}`, content);
-      void notifyActionCompleted();
-    },
-    onCopy: async (cues: Cue[], format: SubtitleFormat) => {
-      const { quota } = await requireVideoAccess();
-      ensurePanel().updateQuota(quota);
-      const content = serializeCues(cues, format);
-      await navigator.clipboard.writeText(content);
-      void notifyActionCompleted();
-    },
-    onTranslate: async (track: CaptionTrack, targetLang: string) => {
-      const { videoId, session, quota } = await requireVideoAccess();
-      ensurePanel().updateQuota(quota);
-      const cues = await getCleanCues(track);
-      const { cues: translated, quota: translateQuota } = await translateAllCues(
-        videoId,
-        cues,
-        track.languageCode,
-        targetLang,
-        session,
-      );
-      ensurePanel().updateQuota(translateQuota);
-      void notifyActionCompleted();
-      return { original: cues, translated };
-    },
-    onLoadTranscript: async (track: CaptionTrack) => getCleanCues(track),
-    onLogin: async () => login(),
-    onToggle: (nextOpen) => {
-      if (nextOpen) void loadTracksIfNeeded();
-    },
-  });
-  return panel;
-}
-
-async function loadTracksIfNeeded(): Promise<void> {
-  const videoId = getVideoId(location.href);
-  const p = ensurePanel();
-  if (!videoId) {
-    p.renderEmpty();
-    return;
-  }
-  if (videoId === loadedVideoId) return;
-
-  p.renderLoading();
-  try {
-    const tracks = await fetchCaptionTracks(videoId);
-    const session = await getSession();
-    const quota = session ? await getMe(session).catch(() => null) : null;
-    loadedVideoId = videoId;
-    if (tracks.length === 0) {
-      p.renderEmpty();
-    } else {
-      p.renderTracks(tracks, session, quota);
-    }
-  } catch {
-    p.renderEmpty();
-  }
-}
-
+// The transcript and translation UI lives in Chrome's panel.
 chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
-  if (message?.type === "TOGGLE_PANEL") {
-    ensurePanel().toggle();
-    sendResponse({ ok: true });
+  if (message?.type === "GET_VIDEO_STATE") {
+    sendResponse(state());
+    return false;
   }
+  if (message?.type === "SEEK_VIDEO") {
+    if (message.videoId === state().videoId && Number.isFinite(message.seconds)) {
+      const video = document.querySelector<HTMLVideoElement>("video");
+      if (video) video.currentTime = Math.max(0, message.seconds);
+    }
+    sendResponse({ ok: true });
+    return false;
+  }
+  if (!["GET_CAPTION_TRACKS", "GET_TRANSCRIPT"].includes(message?.type)) return false;
+  void (async () => {
+    try {
+      if (!message.videoId || message.videoId !== state().videoId) throw new Error("Video changed");
+      const data = message.type === "GET_CAPTION_TRACKS"
+        ? await fetchCaptionTracks(message.videoId)
+        : cleanupCues(await fetchCuesFromPanel(message.track));
+      if (message.videoId !== state().videoId) throw new Error("Video changed");
+      sendResponse({ data });
+    } catch (error) {
+      sendResponse({ error: error instanceof Error ? error.message : String(error) });
+    }
+  })();
   return true;
 });
+let lastTimeSent = 0;
+document.addEventListener("timeupdate", (event) => {
+  const video = event.target;
+  if (!(video instanceof HTMLVideoElement) || Date.now() - lastTimeSent < 250) return;
+  lastTimeSent = Date.now();
+  void chrome.runtime.sendMessage({ type: "VIDEO_TIME", videoId: state().videoId, time: video.currentTime }).catch(() => {});
+}, true);
 
-document.addEventListener("yt-navigate-finish", () => {
-  loadedVideoId = null;
-  // YouTube is a single-page app: navigating from a non-video page (home,
-  // search results) into a video via its own router does NOT re-run content
-  // scripts, only fires this event. If the extension first loaded on a
-  // non-video page, `panel` was never created (see the bottom of this file),
-  // so the FAB never appeared — confirmed via Playwright: SPA nav into a
-  // video left #yt-subs-downloader-host absent, while a full reload of the
-  // same URL created it. Ensuring the panel here (not just updating an
-  // existing one) fixes that.
-  if (getVideoId(location.href)) ensurePanel();
-  if (panel?.isOpen()) void loadTracksIfNeeded();
-});
-
-if (getVideoId(location.href)) {
-  ensurePanel();
+// YouTube replaces its controls during SPA navigation and player recreation.
+// Keep exactly one launch button in the current video's control bar.
+const PLAYER_BUTTON_ID = "yt-subs-player-button";
+function mountPlayerButton(): void {
+  const existing = document.getElementById(PLAYER_BUTTON_ID);
+  const controls = getVideoId(location.href)
+    ? document.querySelector<HTMLElement>("#movie_player .ytp-right-controls")
+    : null;
+  if (!controls) {
+    existing?.remove();
+    return;
+  }
+  const subtitles = controls.querySelector(".ytp-subtitles-button");
+  const group = subtitles?.parentElement
+    ?? controls.querySelector<HTMLElement>(".ytp-right-controls-left")
+    ?? controls;
+  if (existing?.parentElement === group) return;
+  existing?.remove();
+  const button = document.createElement("button");
+  button.id = PLAYER_BUTTON_ID;
+  button.type = "button";
+  button.className = "ytp-button";
+  button.disabled = true;
+  button.style.cssText = "display:inline-flex;align-items:center;justify-content:center;vertical-align:top;height:100%;padding:0;flex-shrink:0";
+  button.title = chrome.i18n.getMessage("openSubtitlePanel") || "Open subtitle translator";
+  button.setAttribute("aria-label", button.title);
+  const icon = document.createElement("img");
+  icon.src = chrome.runtime.getURL("icons/icon48.png");
+  icon.alt = "";
+  icon.draggable = false;
+  icon.style.cssText = "width:24px;height:24px;object-fit:contain;display:block;pointer-events:none";
+  button.appendChild(icon);
+  button.addEventListener("click", event => {
+    event.preventDefault();
+    event.stopPropagation();
+    void chrome.runtime.sendMessage({ type: "OPEN_SUBTITLE_PANEL" }).then(response => {
+      if (response?.error) console.error("Could not open subtitle panel:", response.error);
+    }).catch(console.error);
+  });
+  void chrome.runtime.sendMessage({ type: "PREPARE_SUBTITLE_PANEL" }).then(response => {
+    button.disabled = Boolean(response?.error);
+  }).catch(console.error);
+  if (subtitles) group.insertBefore(button, subtitles);
+  else group.prepend(button);
 }
+let playerButtonUpdatePending = false;
+new MutationObserver(() => {
+  if (playerButtonUpdatePending) return;
+  playerButtonUpdatePending = true;
+  requestAnimationFrame(() => {
+    playerButtonUpdatePending = false;
+    mountPlayerButton();
+  });
+}).observe(document.body, { childList: true, subtree: true });
+document.addEventListener("yt-navigate-finish", mountPlayerButton);
+window.addEventListener("popstate", mountPlayerButton);
+mountPlayerButton();

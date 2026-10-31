@@ -356,5 +356,20 @@
   },
   "langName_IS": {
     "message": "Исландский"
+  },
+  "newVideoDetected": {
+    "message": "Новое видео обнаружено"
+  },
+  "newVideoHint": {
+    "message": "Загрузите субтитры, когда будете готовы."
+  },
+  "loadVideoButton": {
+    "message": "Загрузить субтитры"
+  },
+  "optionalGoogleLink": {
+    "message": "Привязать Google (необязательно)"
+  },
+  "openSubtitlePanel": {
+    "message": "Открыть переводчик субтитров"
   }
 }

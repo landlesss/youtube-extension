@@ -88,10 +88,10 @@
     background: #0f0f0f; padding: 18px; height: 236px;
   }
   .panel-head { display: flex; align-items: center; gap: 9px; margin-bottom: 14px; }
-  .panel-head .sphere {
-    width: 22px; height: 22px; border-radius: 50%; flex: none;
-    background: radial-gradient(circle at 32% 28%, #bfe3ff, transparent 45%), linear-gradient(135deg, #5cb0ff, #17429a 60%, #0a1a3d);
-  }
+  .panel-head .brand-icon {
+    width: 22px; height: 22px; border-radius: 0; flex: none;
+
+   object-fit: contain;}
   .panel-head span { color: #f1f1f1; font-size: 15px; font-weight: 700; }
   .row {
     background: #1a2b3a; border: 1px solid #24384a; border-radius: 9px; padding: 8px 11px; margin-bottom: 8px;
@@ -110,10 +110,10 @@
   .brand {
     position: absolute; bottom: 40px; left: 72px; display: flex; align-items: center; gap: 12px;
   }
-  .brand .sphere {
-    width: 30px; height: 30px; border-radius: 50%;
-    background: radial-gradient(circle at 32% 28%, #bfe3ff, transparent 45%), linear-gradient(135deg, #5cb0ff, #17429a 60%, #0a1a3d);
-  }
+  .brand .brand-icon {
+    width: 30px; height: 30px; border-radius: 0;
+
+   object-fit: contain;}
   .brand span { font-family: ui-monospace, monospace; font-size: 14px; color: #7f93b3; letter-spacing: 0.02em; }
 </style>
 </head>
@@ -149,7 +149,7 @@
       <div class="caption-chip">If you can master the correct mindset,</div>
     </div>
     <div class="panel">
-      <div class="panel-head"><span class="sphere"></span><span>Subtitles</span></div>
+      <div class="panel-head"><img class="brand-icon" src="../../extension/icons/source.png" alt=""><span>Subtitles</span></div>
       <div class="row">
         <span class="ts">0:07</span>
         <div class="orig">If you can master the correct mindset,</div>
@@ -165,7 +165,7 @@
   </div>
 
   <div class="brand">
-    <span class="sphere"></span>
+    <img class="brand-icon" src="../../extension/icons/source.png" alt="">
     <span>downloadsubtitles.online</span>
   </div>
 </div>

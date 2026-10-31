@@ -1,105 +1,79 @@
-import type { Session } from "./types";
-import { BACKEND_URL } from "./lib/config";
-
-const SESSION_KEY = "session";
-
-async function getStoredSession(): Promise<Session | null> {
-  const data = await chrome.storage.local.get(SESSION_KEY);
-  return (data[SESSION_KEY] as Session | undefined) ?? null;
-}
-
-async function exchangeGoogleToken(accessToken: string): Promise<Session> {
-  const res = await fetch(`${BACKEND_URL}/auth/google`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ accessToken }),
-  });
-
-  if (!res.ok) {
-    throw new Error(`Backend auth failed (${res.status})`);
-  }
-
-  const session = (await res.json()) as Session;
-  await chrome.storage.local.set({ [SESSION_KEY]: session });
-  return session;
-}
-
-async function loginWithGoogle(): Promise<Session> {
-  const googleToken = await chrome.identity.getAuthToken({ interactive: true });
-  const accessToken = typeof googleToken === "string" ? googleToken : googleToken.token;
-  if (!accessToken) throw new Error("No Google access token returned");
-  return exchangeGoogleToken(accessToken);
-}
-
-// Called when a backend request comes back 401 (our session JWT expired).
-// Tries to mint a fresh backend session from the still-cached Google token,
-// without ever prompting the user — falls back to clearing the stale
-// session so the UI naturally reverts to "signed out" on its next render.
-async function silentRefresh(): Promise<Session | null> {
-  try {
-    const googleToken = await chrome.identity.getAuthToken({ interactive: false });
-    const accessToken = typeof googleToken === "string" ? googleToken : googleToken.token;
-    if (!accessToken) {
-      await chrome.storage.local.remove(SESSION_KEY);
-      return null;
-    }
-    return await exchangeGoogleToken(accessToken);
-  } catch {
-    await chrome.storage.local.remove(SESSION_KEY);
-    return null;
-  }
-}
-
-async function logout(): Promise<void> {
-  const session = await getStoredSession();
-  await chrome.storage.local.remove(SESSION_KEY);
-  if (session) {
-    const googleToken = await chrome.identity.getAuthToken({ interactive: false }).catch(() => null);
-    const token = typeof googleToken === "string" ? googleToken : googleToken?.token;
-    if (token) await chrome.identity.removeCachedAuthToken({ token });
-  }
-}
+import { UNINSTALL_FEEDBACK_URL } from "./lib/config";
+import { ensureSession, refreshSession } from "./lib/sessions";
 
 chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
-  (async () => {
-    switch (message?.type) {
-      case "GET_SESSION": {
-        sendResponse({ session: await getStoredSession() });
-        break;
+  if (!["GET_SESSION", "SILENT_REFRESH"].includes(message?.type)) return false;
+  void (async () => {
+    try {
+      switch (message.type) {
+        case "GET_SESSION": sendResponse({ session: await ensureSession() }); break;
+        case "SILENT_REFRESH": sendResponse({ session: await refreshSession(message.failedToken) }); break;
       }
-      case "LOGIN": {
-        try {
-          const session = await loginWithGoogle();
-          sendResponse({ session });
-        } catch (err) {
-          sendResponse({ error: err instanceof Error ? err.message : String(err) });
-        }
-        break;
-      }
-      case "LOGOUT": {
-        await logout();
-        sendResponse({ ok: true });
-        break;
-      }
-      case "SILENT_REFRESH": {
-        sendResponse({ session: await silentRefresh() });
-        break;
-      }
-      default:
-        sendResponse({ error: "Unknown message type" });
+    } catch (error) {
+      sendResponse({ error: error instanceof Error ? error.message : String(error) });
     }
   })();
   return true;
 });
 
-chrome.action.onClicked.addListener((tab) => {
-  // Fails on any tab without our content script (i.e. not youtube.com) —
-  // that's expected there, so swallow it instead of an unhandled rejection.
-  if (tab.id) chrome.tabs.sendMessage(tab.id, { type: "TOGGLE_PANEL" }).catch(() => {});
+// No global panel: enable an independent panel only on an explicit toolbar click.
+void chrome.sidePanel.setOptions({ enabled: false });
+void chrome.sidePanel.setPanelBehavior({ openPanelOnActionClick: false });
+function isYouTube(url?: string): boolean {
+  if (!url) return false;
+  try { return new URL(url).origin === "https://www.youtube.com"; }
+  catch { return false; }
+}
+function preparePanelForTab(tabId: number): Promise<void> {
+  return chrome.sidePanel.setOptions({
+    tabId, path: `sidepanel.html?tabId=${tabId}`, enabled: true,
+  });
+}
+chrome.action.onClicked.addListener(tab => {
+  if (tab.id === undefined || !isYouTube(tab.url)) return;
+  void chrome.sidePanel.open({ tabId: tab.id }).catch(console.error);
 });
+// A player-control click carries the user gesture from the content script.
+chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+  if (!["PREPARE_SUBTITLE_PANEL", "OPEN_SUBTITLE_PANEL"].includes(message?.type)) return false;
+  if (sender.tab?.id === undefined || !isYouTube(sender.url ?? sender.tab.url)) return false;
+  const tabId = sender.tab.id;
+  // Prepare when the control mounts so open() runs synchronously on the click.
+  const action = message.type === "PREPARE_SUBTITLE_PANEL"
+    ? chrome.sidePanel.setOptions({ tabId, path: `sidepanel.html?tabId=${tabId}`, enabled: true })
+    : chrome.sidePanel.open({ tabId });
+  void action.then(
+    () => sendResponse({ ok: true }),
+    error => sendResponse({ error: error instanceof Error ? error.message : String(error) }),
+  );
+  return true;
+});
+chrome.tabs.onUpdated.addListener((tabId, change, tab) => {
+  if (!change.url && change.status !== "complete") return;
+  if (isYouTube(change.url ?? tab.url)) {
+    void preparePanelForTab(tabId).catch(() => {});
+  } else {
+    void chrome.sidePanel.setOptions({ tabId, enabled: false }).catch(() => {});
+  }
+});
+
+// Prepare already-open YouTube tabs after an extension reload or worker restart.
+void chrome.tabs.query({ url: "https://www.youtube.com/*" }).then(tabs => {
+  for (const tab of tabs) {
+    if (tab.id !== undefined) void preparePanelForTab(tab.id).catch(() => {});
+  }
+}).catch(console.error);
 
 chrome.runtime.onInstalled.addListener((details) => {
   if (details.reason === "install") {
     void chrome.tabs.create({ url: chrome.runtime.getURL("welcome.html") });
   }
+});
+
+// Register on worker startup as well as installation, covering existing installs.
+const uninstallUrl = new URL(UNINSTALL_FEEDBACK_URL);
+uninstallUrl.searchParams.set("lang", chrome.i18n.getUILanguage());
+uninstallUrl.searchParams.set("version", chrome.runtime.getManifest().version);
+chrome.runtime.setUninstallURL(uninstallUrl.href, () => {
+  if (chrome.runtime.lastError) console.error("Could not register uninstall feedback:", chrome.runtime.lastError.message);
 });

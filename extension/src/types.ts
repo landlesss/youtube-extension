@@ -17,12 +17,14 @@ export type TranslationMode = "translation" | "bilingual";
 
 export interface Session {
   token: string;
-  email: string;
+  email?: string;
+  isAnonymous?: boolean;
 }
 
 export type Plan = "free" | "pro";
 
 export interface Quota {
+  isAnonymous?: boolean;
   plan: Plan;
   remaining: number | null;
   resetAt: string;

@@ -1,7 +1,7 @@
 import type { CaptionTrack, Cue, Quota, SubtitleFormat, Session, TranslationMode } from "../types";
 import { t } from "../lib/i18n";
 import { reviewPageUrl } from "../lib/reviewPrompt";
-import { describeApiError, getMe } from "../lib/api";
+import { describeApiError } from "../lib/api";
 import { FEEDBACK_FORM_URL } from "../lib/config";
 import { toBilingualCues } from "../lib/cues";
 
@@ -61,8 +61,7 @@ export interface PanelCallbacks {
     targetLang: string,
   ) => Promise<{ original: Cue[]; translated: Cue[] }>;
   onLoadTranscript: (track: CaptionTrack) => Promise<Cue[]>;
-  onLogin: () => Promise<Session | null>;
-  onToggle: (nextOpen: boolean) => void;
+  onSeek: (seconds: number) => void;
 }
 
 interface SearchableSelect {
@@ -129,13 +128,10 @@ function createSearchableSelect(
 }
 
 export class SubtitlePanel {
-  private host: HTMLElement;
   private shadow: ShadowRoot;
   private root: HTMLDivElement;
-  private fab: HTMLButtonElement;
-  private visible = false;
-  private bodyObserver: MutationObserver;
 
+  private previewGeneration = 0;
   private transcriptCues: Cue[] = [];
   // The plain, untranslated cues for the currently selected track — kept
   // separate from transcriptCues because that array can hold the merged
@@ -147,19 +143,13 @@ export class SubtitlePanel {
   private lastTranslation: { targetLang: string; translated: Cue[] } | null = null;
   private transcriptRowEls: HTMLElement[] = [];
   private activeIndex = -1;
-  private videoEl: HTMLVideoElement | null = null;
-  private readonly onVideoTimeUpdate = (): void => {
-    const video = this.videoEl;
-    if (!video) return;
-    const time = video.currentTime;
-    const idx = this.transcriptCues.findIndex((c) => time >= c.start && time < c.end);
+  updatePlaybackTime(time: number): void {
+    const idx = this.transcriptCues.findIndex(c => time >= c.start && time < c.end);
     if (idx === this.activeIndex) return;
     this.activeIndex = idx;
     this.transcriptRowEls.forEach((el, i) => el.classList.toggle("active", i === idx));
-    if (idx >= 0) {
-      this.transcriptRowEls[idx]?.scrollIntoView({ block: "center", behavior: "smooth" });
-    }
-  };
+    if (idx >= 0) this.transcriptRowEls[idx]?.scrollIntoView({ block: "center", behavior: "smooth" });
+  }
 
   constructor(private callbacks: PanelCallbacks) {
     // Always start from a fresh host: a closed shadow root can't be reattached
@@ -169,83 +159,37 @@ export class SubtitlePanel {
     const host = document.createElement("div");
     host.id = HOST_ID;
     document.body.appendChild(host);
-    this.host = host;
 
-    // Closed mode keeps YouTube's page styles (and other extensions) from
-    // leaking in or out — this is what was previously causing the injected
-    // button to inherit stray page styles.
+    // Keep the panel styles isolated inside its extension document.
     this.shadow = host.attachShadow({ mode: "closed" });
     this.root = document.createElement("div");
     this.shadow.appendChild(this.styleEl());
 
-    this.fab = document.createElement("button");
-    this.fab.className = "fab";
-    this.fab.type = "button";
-    this.fab.title = t("panelTitle");
-    const fabIcon = document.createElement("img");
-    fabIcon.src = chrome.runtime.getURL("icons/icon128.png");
-    fabIcon.alt = "";
-    this.fab.appendChild(fabIcon);
-    this.fab.addEventListener("click", () => this.toggle());
-    this.shadow.appendChild(this.fab);
-
     this.shadow.appendChild(this.root);
-    this.root.className = "panel hidden";
-
-    // YouTube's SPA router occasionally wipes and rebuilds large chunks of
-    // <body> on navigation, which can take our host element down with it.
-    // Re-append it whenever that happens so the button survives page changes.
-    this.bodyObserver = new MutationObserver(() => {
-      if (!document.body.contains(this.host)) {
-        document.body.appendChild(this.host);
-      }
-    });
-    this.bodyObserver.observe(document.body, { childList: true });
+    this.root.className = "panel";
   }
 
   private styleEl(): HTMLStyleElement {
     const style = document.createElement("style");
     style.textContent = `
       .panel {
-        position: fixed;
-        top: 122px;
-        right: 16px;
-        width: 340px;
-        max-height: 80vh;
+        box-sizing: border-box;
+        position: relative;
+        width: 100%;
+        min-height: 100vh;
         overflow-y: auto;
-        background: #0f0f0f;
-        color: #f1f1f1;
-        border: 1px solid #303030;
-        border-radius: 12px;
-        box-shadow: 0 4px 24px rgba(0,0,0,0.4);
+        background: rgba(12, 15, 21, 0.98);
+        color: #f5f7fb;
+        border-left: 1px solid rgba(255,255,255,0.08);
+        border-radius: 0;
+        box-shadow: -14px 0 28px rgba(0,0,0,0.28);
         font-family: Roboto, Arial, sans-serif;
         font-size: 13px;
         z-index: 2147483647;
-        padding: 12px;
+        padding: 12px 14px 10px;
+        backdrop-filter: blur(8px);
       }
       .panel.hidden { display: none; }
-      .fab {
-        position: fixed;
-        top: 72px;
-        right: 16px;
-        width: 48px;
-        height: 48px;
-        margin: 0;
-        line-height: normal;
-        box-sizing: border-box;
-        border-radius: 50%;
-        background: #182035;
-        border: 2px solid #4fd1c5;
-        cursor: pointer;
-        z-index: 2147483647;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        padding: 0;
-        box-shadow: 0 2px 12px rgba(0,0,0,0.5), 0 0 0 4px rgba(79,209,197,0.15);
-      }
-      .fab img { width: 32px; height: 32px; border-radius: 50%; display: block; margin: 0; }
-      .fab:hover { background: #20364a; transform: scale(1.05); }
       .title-row {
         display: flex;
         align-items: center;
@@ -253,7 +197,7 @@ export class SubtitlePanel {
         margin-bottom: 8px;
       }
       .title-group { display: flex; align-items: center; gap: 8px; }
-      .title-icon { width: 20px; height: 20px; border-radius: 50%; display: block; }
+      .title-icon { width: 20px; height: 20px; border-radius: 0; display: block; }
       .title { font-size: 14px; font-weight: 600; }
       .icon-btn {
         width: auto;
@@ -476,36 +420,10 @@ export class SubtitlePanel {
     return style;
   }
 
-  toggle(): void {
-    this.visible = !this.visible;
-    this.root.classList.toggle("hidden", !this.visible);
-    this.callbacks.onToggle(this.visible);
-  }
-
-  isOpen(): boolean {
-    return this.visible;
-  }
-
-  destroy(): void {
-    this.bodyObserver.disconnect();
-    this.videoEl?.removeEventListener("timeupdate", this.onVideoTimeUpdate);
-    this.host.remove();
-  }
-
   updateQuota(quota: Quota): void {
     const el = this.shadow.querySelector<HTMLElement>(".quota-line");
     if (!el) return;
     el.textContent = quota.plan === "pro" ? t("quotaProLine") : t("quotaFreeLine", String(quota.remaining ?? 0));
-  }
-
-  private attachVideoSync(): void {
-    const video = document.querySelector<HTMLVideoElement>("video");
-    if (this.videoEl && this.videoEl !== video) {
-      this.videoEl.removeEventListener("timeupdate", this.onVideoTimeUpdate);
-    }
-    this.videoEl = video;
-    this.activeIndex = -1;
-    video?.addEventListener("timeupdate", this.onVideoTimeUpdate);
   }
 
   // Lets the live preview show original+translation together after a
@@ -556,28 +474,32 @@ export class SubtitlePanel {
 
       row.append(ts, text);
       row.addEventListener("click", () => {
-        const video = document.querySelector<HTMLVideoElement>("video");
-        if (video) video.currentTime = cue.start;
+        this.callbacks.onSeek(cue.start);
       });
 
       container.appendChild(row);
       this.transcriptRowEls.push(row);
     }
 
-    this.attachVideoSync();
+
   }
 
   private async loadTranscriptPreview(track: CaptionTrack): Promise<void> {
+    const generation = ++this.previewGeneration;
     const container = this.shadow.querySelector<HTMLElement>(".transcript-list");
+    this.originalCues = [];
+    this.transcriptCues = [];
     if (container) container.innerHTML = `<div class="empty">${t("loading")}</div>`;
     // A newly selected track's original text has nothing to do with any
     // translation run for the previous one.
     this.lastTranslation = null;
     try {
       const cues = await this.callbacks.onLoadTranscript(track);
+      if (generation !== this.previewGeneration) return;
       this.originalCues = cues;
       this.renderTranscriptList(cues);
     } catch (err) {
+      if (generation !== this.previewGeneration) return;
       if (container) {
         container.innerHTML = `<div class="empty">${err instanceof Error ? err.message : t("error")}</div>`;
       }
@@ -632,50 +554,31 @@ export class SubtitlePanel {
     // meant most people never noticed it. It stays until rated or closed.
   }
 
-  private renderHeader(): void {
-    const titleRow = document.createElement("div");
-    titleRow.className = "title-row";
+  private resetVideoState(): void {
+    ++this.previewGeneration;
 
-    const titleGroup = document.createElement("div");
-    titleGroup.className = "title-group";
-
-    const titleIcon = document.createElement("img");
-    titleIcon.className = "title-icon";
-    titleIcon.src = chrome.runtime.getURL("icons/icon128.png");
-    titleIcon.alt = "";
-
-    const title = document.createElement("div");
-    title.className = "title";
-    title.textContent = t("panelTitle");
-
-    titleGroup.append(titleIcon, title);
-
-    const closeBtn = document.createElement("button");
-    closeBtn.type = "button";
-    closeBtn.className = "icon-btn";
-    closeBtn.textContent = "×";
-    closeBtn.title = t("closeButton");
-    closeBtn.addEventListener("click", () => this.toggle());
-
-    titleRow.append(titleGroup, closeBtn);
-    this.root.appendChild(titleRow);
+    this.transcriptCues = [];
+    this.originalCues = [];
+    this.lastTranslation = null;
+    this.transcriptRowEls = [];
+    this.activeIndex = -1;
   }
 
   renderLoading(): void {
+    this.resetVideoState();
     this.root.innerHTML = "";
-    this.renderHeader();
     this.root.insertAdjacentHTML("beforeend", `<div class="empty">${t("loading")}</div>`);
   }
 
   renderEmpty(): void {
+    this.resetVideoState();
     this.root.innerHTML = "";
-    this.renderHeader();
     this.root.insertAdjacentHTML("beforeend", `<div class="empty">${t("noSubtitles")}</div>`);
   }
 
-  renderTracks(tracks: CaptionTrack[], session: Session | null, quota: Quota | null = null): void {
+  renderTracks(tracks: CaptionTrack[], _session: Session | null, quota: Quota | null = null): void {
+    this.resetVideoState();
     this.root.innerHTML = "";
-    this.renderHeader();
 
     const langRow = document.createElement("div");
     langRow.className = "row";
@@ -722,41 +625,8 @@ export class SubtitlePanel {
     const status = document.createElement("div");
     status.className = "status";
 
-    // Downloading/copying/translating all require a signed-in session — the
-    // backend enforces a daily per-video quota on every one of them. Reading
-    // the live preview above does not, so it stays usable while signed out.
-    if (!session) {
-      const notice = document.createElement("div");
-      notice.className = "empty";
-      notice.style.marginTop = "10px";
-      notice.textContent = t("signInRequiredNotice");
-      this.root.appendChild(notice);
-
-      const signInBtn = document.createElement("button");
-      signInBtn.textContent = t("signInButton");
-      signInBtn.style.marginTop = "6px";
-      signInBtn.addEventListener("click", async () => {
-        signInBtn.disabled = true;
-        try {
-          const newSession = await this.callbacks.onLogin();
-          const newQuota = newSession ? await getMe(newSession).catch(() => null) : null;
-          this.renderTracks(tracks, newSession, newQuota);
-        } catch (err) {
-          status.textContent = describeApiError(err);
-          signInBtn.disabled = false;
-        }
-      });
-      this.root.appendChild(signInBtn);
-      this.root.appendChild(status);
-      return;
-    }
-
-    const signedIn = document.createElement("div");
-    signedIn.className = "empty";
-    signedIn.style.marginTop = "10px";
-    signedIn.textContent = t("signedInAs", session.email);
-    this.root.appendChild(signedIn);
-
+    // A guest session has the same controls and server-enforced quota.
+    // Google linking is optional and never blocks the first action.
     const quotaLine = document.createElement("div");
     quotaLine.className = "quota-line";
     this.root.appendChild(quotaLine);
@@ -825,7 +695,8 @@ export class SubtitlePanel {
     this.root.appendChild(translationStatusLine);
 
     const translatePanel = document.createElement("div");
-    translatePanel.className = "translate-panel hidden";
+    translatePanel.className = "translate-panel";
+    translateCell.classList.add("active");
 
     const targetRow = document.createElement("div");
     targetRow.className = "row";
@@ -976,10 +847,13 @@ export class SubtitlePanel {
       translateSubmitBtn.disabled = true;
       setBusy(translateSubmitBtn, true, t("translating"));
       status.textContent = "";
+      const generation = this.previewGeneration;
+      const targetLang = targetSelect.getValue();
       try {
-        const { original, translated } = await this.callbacks.onTranslate(track, targetSelect.getValue());
+        const { original, translated } = await this.callbacks.onTranslate(track, targetLang);
+        if (generation !== this.previewGeneration) return;
         this.originalCues = original;
-        this.lastTranslation = { targetLang: targetSelect.getValue(), translated };
+        this.lastTranslation = { targetLang, translated };
         // The live preview always shows original+translation together once a
         // translation exists, regardless of what Download/Copy will produce.
         this.setTranscriptPreview(toBilingualCues(original, translated));

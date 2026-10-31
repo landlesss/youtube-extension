@@ -1,157 +1,93 @@
 import type { CaptionTrack, Cue } from "../types";
+import { fetchIsolatedTranscript } from "./isolatedTranscript";
+import { getVideoId } from "./youtube";
 
-// YouTube's timedtext API now frequently requires a PO (proof-of-origin) token
-// for auto-generated captions and returns HTTP 200 with an empty body without
-// one. The token is computed by the player's own obfuscated JS and isn't
-// exposed on captionTracks.baseUrl, so a plain fetch() can't reproduce it.
-//
-// Workaround: since the on-page transcript panel is populated by YouTube's own
-// client (which already has a valid token), we open it and read the rendered
-// segments from the DOM instead of calling the API ourselves. This is brittle
-// against YouTube markup changes.
-//
-// YouTube currently serves (at least) two different DOM implementations for
-// this panel, seemingly split by account/experiment cohort rather than by
-// video: a newer "ytw"-prefixed component set (<transcript-segment-view-model>,
-// captured August 2026) and an older Polymer-style renderer
-// (<ytd-transcript-segment-renderer>, confirmed still live in the same month
-// on a different account). Both are handled below — will need updating if
-// YouTube retires or redesigns either one.
-//
-// Known limitation: the panel shows whichever caption language YouTube's
-// player currently has selected. We don't yet drive the panel's own language
-// switcher, so for videos with multiple caption tracks the download may not
-// match the "Original language" chosen in our own dropdown.
+function textOf(value: unknown): string {
+  if (typeof value === "string") return value;
+  if (!value || typeof value !== "object") return "";
+  const item = value as Record<string, unknown>;
+  if (typeof item.text === "string") return item.text;
+  if (typeof item.simpleText === "string") return item.simpleText;
+  if (typeof item.content === "string") return item.content;
+  if (Array.isArray(item.runs)) return item.runs.map(textOf).join("");
+  return Object.values(item).map(textOf).join("");
+}
 
-// On a working video, YouTube's own transcript panel populates in well under
-// 1s (measured 250-480ms). When YouTube's internal get_transcript API fails
-// server-side for a given video (confirmed via network capture: it returns
-// HTTP 400 FAILED_PRECONDITION for some videos, independent of our code,
-// the user's account, or click method — a YouTube-side issue we can't fix),
-// that failure also happens almost immediately. So a long timeout only makes
-// users wait needlessly for a request that has already failed; 8s leaves
-// generous headroom for a slow connection without that wait.
-const PANEL_OPEN_TIMEOUT_MS = 8000;
-const POLL_INTERVAL_MS = 200;
-
-async function waitFor<T>(check: () => T | null | undefined, timeoutMs: number): Promise<T> {
-  const start = Date.now();
-  while (Date.now() - start < timeoutMs) {
-    const value = check();
-    if (value) return value;
-    await new Promise((resolve) => setTimeout(resolve, POLL_INTERVAL_MS));
+export function parseTranscriptResponse(body: unknown): Cue[] {
+  const cues: Cue[] = [];
+  function visit(value: unknown): void {
+    if (!value || typeof value !== "object") return;
+    const item = value as Record<string, unknown>;
+    const segment = (item.transcriptSegmentRenderer ?? item.transcriptSegmentViewModel) as Record<string, unknown> | undefined;
+    if (segment) {
+      const start = Number(segment.startMs) / 1000;
+      const end = Number(segment.endMs) / 1000;
+      const text = textOf(segment.snippet ?? segment.text).trim();
+      if (Number.isFinite(start) && text) cues.push({ start, end: Number.isFinite(end) && end > start ? end : start + 4, text });
+      return;
+    }
+    for (const child of Object.values(item)) visit(child);
   }
-  throw new Error(
-    "YouTube couldn't load the transcript for this video. This is a YouTube-side issue on some videos — try again later or use a different video.",
-  );
+  visit(body);
+  return cues;
 }
 
-// YouTube's newer button components (the "ytSpecButtonShapeNext..." family)
-// may key their interaction off the real pointer/mouse event sequence rather
-// than the synthetic "click" event alone that HTMLElement.click() fires.
-// Not confirmed as the root cause of the timeout bug (that turned out to be
-// PANEL_OPEN_TIMEOUT_MS being too tight), but dispatching the fuller event
-// sequence is a strict superset of a plain click and can't hurt.
-function simulateClick(el: HTMLElement): void {
-  const opts = { bubbles: true, cancelable: true, composed: true, view: window };
-  el.dispatchEvent(new PointerEvent("pointerdown", opts));
-  el.dispatchEvent(new MouseEvent("mousedown", opts));
-  el.dispatchEvent(new PointerEvent("pointerup", opts));
-  el.dispatchEvent(new MouseEvent("mouseup", opts));
-  el.dispatchEvent(new MouseEvent("click", opts));
-}
-
-function findTranscriptButton(): HTMLElement | null {
-  return document.querySelector<HTMLElement>(
-    "ytd-video-description-transcript-section-renderer button",
-  );
-}
-
-function findSegments(): HTMLElement[] {
-  const modern = document.querySelectorAll<HTMLElement>("transcript-segment-view-model");
-  if (modern.length > 0) return Array.from(modern);
-  return Array.from(document.querySelectorAll<HTMLElement>("ytd-transcript-segment-renderer"));
-}
-
-interface OpenedPanel {
-  button: HTMLElement;
-  // Whether this call is the one that opened the panel — only that caller
-  // should close it again afterward. Otherwise a second call on the same
-  // video (or a panel the user already had open manually) could toggle it
-  // back open instead of leaving it alone.
-  weOpenedIt: boolean;
-}
-
-async function openPanel(): Promise<OpenedPanel> {
-  if (findSegments().length > 0) {
-    const button = findTranscriptButton();
-    if (button) return { button, weOpenedIt: false };
-  }
-
-  const button = findTranscriptButton();
-  if (!button) {
-    throw new Error('Couldn\'t find YouTube\'s "Show transcript" button on this page');
-  }
-  simulateClick(button);
-  await waitFor(() => (findSegments().length > 0 ? true : null), PANEL_OPEN_TIMEOUT_MS);
-  return { button, weOpenedIt: true };
-}
-
-function parseTimestamp(text: string): number | null {
-  const parts = text.trim().split(":").map(Number);
-  if (parts.length === 0 || parts.some((p) => Number.isNaN(p))) return null;
-  return parts.reduce((acc, p) => acc * 60 + p, 0);
-}
-
-function readSegments(): Cue[] {
-  const raw: Array<{ start: number; text: string }> = [];
-
-  for (const node of findSegments()) {
-    const timestampEl =
-      node.querySelector(".ytwTranscriptSegmentViewModelTimestamp") ??
-      node.querySelector(".segment-timestamp");
-    const textEl =
-      node.querySelector("span.ytAttributedStringHost") ?? node.querySelector(".segment-text");
-    const start = parseTimestamp(timestampEl?.textContent ?? "");
-    const text = textEl?.textContent?.trim() ?? "";
-    if (start === null || !text) continue;
-    raw.push({ start, text });
-  }
-
-  // The panel only exposes a start time per line, so we approximate each
-  // cue's end as the next cue's start (and pad the last one by 4s).
-  return raw.map((seg, i) => ({
-    start: seg.start,
-    end: raw[i + 1] ? raw[i + 1].start : seg.start + 4,
-    text: seg.text,
-  }));
-}
-
-// The auto-loaded live preview and any button the user clicks (Download /
-// Copy / Translate) can both call this around the same time. Without
-// serializing them, two concurrent calls each toggle the same "Show
-// transcript" button — one opens it, the other's toggle click closes it
-// again mid-wait, and the first call times out waiting for segments that
-// never arrive. Track-switching isn't implemented (see note above), so
-// concurrent calls are reading the same underlying panel state anyway —
-// sharing one in-flight request is both a fix and a free optimization.
-let inFlight: Promise<Cue[]> | null = null;
-
+// Direct requests are preferred. A separate hidden document provides a fallback
+// without opening or clicking YouTube engagement panels in the visible page.
+const pending = new Map<string, Promise<Cue[]>>();
+const cached = new Map<string, Cue[]>();
 export async function fetchCuesFromPanel(track: CaptionTrack): Promise<Cue[]> {
-  if (inFlight) return inFlight;
-  inFlight = runFetchCuesFromPanel(track).finally(() => {
-    inFlight = null;
-  });
-  return inFlight;
+  const videoId = getVideoId(location.href);
+  if (!videoId) throw new Error("Open a YouTube video first");
+  const key = `${videoId}:${track.languageCode}`;
+  const ready = cached.get(key);
+  if (ready) return ready;
+  const existing = pending.get(key);
+  if (existing) return existing;
+  const request = fetchCaptionFile(track).catch(() => fetchTranscript(videoId)).catch(() => fetchIsolatedTranscript(videoId)).then(cues => {
+    if (cached.size >= 5) cached.delete(cached.keys().next().value!);
+    cached.set(key, cues);
+    return cues;
+  }).finally(() => pending.delete(key));
+  pending.set(key, request);
+  return request;
 }
 
-async function runFetchCuesFromPanel(track: CaptionTrack): Promise<Cue[]> {
-  const { button, weOpenedIt } = await openPanel();
-  const cues = readSegments();
-  if (weOpenedIt) simulateClick(button); // only close it if we're the ones who opened it
+async function fetchCaptionFile(track: CaptionTrack): Promise<Cue[]> {
+  const url = new URL(track.baseUrl);
+  if (url.origin !== "https://www.youtube.com") throw new Error("Invalid caption URL");
+  url.searchParams.set("fmt", "json3");
+  const response = await fetch(url.href, { credentials: "same-origin", signal: AbortSignal.timeout(15000) });
+  if (!response.ok) throw new Error("Caption file unavailable");
+  const body = await response.json() as { events?: Array<{ tStartMs?: number; dDurationMs?: number; segs?: Array<{ utf8?: string }> }> };
+  const cues = (body.events ?? []).flatMap(event => {
+    const text = event.segs?.map(segment => segment.utf8 ?? "").join("").trim();
+    if (!text || event.tStartMs === undefined) return [];
+    const start = event.tStartMs / 1000;
+    return [{ start, end: start + (event.dDurationMs ?? 4000) / 1000, text }];
+  });
+  if (!cues.length) throw new Error("Caption file is empty");
+  return cues;
+}
 
-  if (cues.length === 0) {
-    throw new Error(`No transcript text found for "${track.name}" — try again`);
-  }
+async function fetchTranscript(videoId: string): Promise<Cue[]> {
+  const page = await fetch(`https://www.youtube.com/watch?v=${encodeURIComponent(videoId)}`, { credentials: "same-origin", signal: AbortSignal.timeout(15000) });
+  if (!page.ok) throw new Error(`YouTube request failed (${page.status})`);
+  const html = await page.text();
+  const paramsMatch = html.match(/"getTranscriptEndpoint"\s*:\s*\{\s*"params"\s*:\s*("(?:[^"\\]|\\.)*")/);
+  const versionMatch = html.match(/"INNERTUBE_CLIENT_VERSION"\s*:\s*"([^"]+)"/);
+  const visitorMatch = html.match(/"VISITOR_DATA"\s*:\s*("(?:[^"\\]|\\.)*")/);
+  if (!paramsMatch || !versionMatch) throw new Error("YouTube did not provide a transcript for this video");
+  const response = await fetch("https://www.youtube.com/youtubei/v1/get_transcript?prettyPrint=false", {
+    method: "POST", credentials: "same-origin", signal: AbortSignal.timeout(15000),
+    headers: { "Content-Type": "application/json", "X-Youtube-Client-Name": "1", "X-Youtube-Client-Version": versionMatch[1] },
+    body: JSON.stringify({
+      context: { client: { clientName: "WEB", clientVersion: versionMatch[1], ...(visitorMatch ? { visitorData: JSON.parse(visitorMatch[1]) } : {}) } },
+      params: JSON.parse(paramsMatch[1]),
+    }),
+  });
+  if (!response.ok) throw new Error(`YouTube couldn't load the transcript (${response.status})`);
+  const cues = parseTranscriptResponse(await response.json());
+  if (!cues.length) throw new Error("YouTube returned an empty transcript");
   return cues;
 }

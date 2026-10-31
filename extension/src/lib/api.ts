@@ -18,20 +18,14 @@ export class ApiError extends Error {
 
 export async function getSession(): Promise<Session | null> {
   const response = await chrome.runtime.sendMessage({ type: "GET_SESSION" });
-  return response?.session ?? null;
-}
-
-export async function login(): Promise<Session | null> {
-  const response = await chrome.runtime.sendMessage({ type: "LOGIN" });
   if (response?.error) throw new Error(response.error);
   return response?.session ?? null;
 }
 
-// Tries to mint a fresh backend session from the still-cached Google token,
-// with no UI prompt. Returns null if that isn't possible (e.g. the user
-// revoked access) — callers should fall back to asking for an explicit sign-in.
-async function silentRefresh(): Promise<Session | null> {
-  const response = await chrome.runtime.sendMessage({ type: "SILENT_REFRESH" });
+// The worker rotates guest credentials or silently refreshes a linked account.
+async function silentRefresh(failedToken: string): Promise<Session | null> {
+  const response = await chrome.runtime.sendMessage({ type: "SILENT_REFRESH", failedToken });
+  if (response?.error) throw new Error(response.error);
   return response?.session ?? null;
 }
 
@@ -75,6 +69,7 @@ async function parseErrorBody(res: Response): Promise<ApiError> {
 
 function parseQuota(body: Record<string, unknown>): Quota {
   return {
+    isAnonymous: typeof body.isAnonymous === "boolean" ? body.isAnonymous : undefined,
     plan: body.plan as Quota["plan"],
     remaining: body.remaining as number | null,
     resetAt: body.resetAt as string,
@@ -99,7 +94,7 @@ async function authFetch(path: string, session: Session, init: RequestInit = {})
 
   let res = await doFetch(session.token);
   if (res.status === 401) {
-    const refreshed = await silentRefresh();
+    const refreshed = await silentRefresh(session.token);
     if (!refreshed) {
       throw new ApiError("unauthorized", t("sessionExpiredError"));
     }

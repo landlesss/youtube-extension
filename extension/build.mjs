@@ -40,7 +40,23 @@ const welcomeCtx = await esbuild.context({
   format: "iife",
 });
 
+const landingCtx = await esbuild.context({
+  ...commonOptions,
+  entryPoints: ["src/welcome/welcome.ts"],
+  outfile: "../docs/onboarding.js",
+  format: "iife",
+  sourcemap: false,
+});
+
+const panelCtx = await esbuild.context({
+  ...commonOptions,
+  entryPoints: ["src/sidepanel/index.ts"],
+  outfile: `${outdir}/sidepanel.js`,
+  format: "iife",
+});
+
 function copyStaticFiles() {
+  cpSync("src/sidepanel/sidepanel.html", `${outdir}/sidepanel.html`);
   if (forStore) {
     const manifest = JSON.parse(readFileSync("manifest.json", "utf8"));
     delete manifest.key;
@@ -53,6 +69,7 @@ function copyStaticFiles() {
   cpSync("icons", `${outdir}/icons`, { recursive: true });
   cpSync("src/welcome/welcome.html", `${outdir}/welcome.html`);
   cpSync("src/welcome/welcome.css", `${outdir}/welcome.css`);
+  cpSync("src/welcome/welcome.css", "../docs/onboarding.css");
 }
 
 if (watch) {
@@ -60,14 +77,20 @@ if (watch) {
   await contentCtx.watch();
   await backgroundCtx.watch();
   await welcomeCtx.watch();
+  await landingCtx.watch();
+  await panelCtx.watch();
   console.log("Watching for changes...");
 } else {
   await contentCtx.rebuild();
   await backgroundCtx.rebuild();
   await welcomeCtx.rebuild();
+  await landingCtx.rebuild();
+  await panelCtx.rebuild();
   copyStaticFiles();
   await contentCtx.dispose();
   await backgroundCtx.dispose();
   await welcomeCtx.dispose();
+  await landingCtx.dispose();
+  await panelCtx.dispose();
   console.log(`Build complete -> ${outdir}/`);
 }

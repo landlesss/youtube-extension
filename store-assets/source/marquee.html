@@ -41,10 +41,10 @@
     box-shadow: 0 40px 90px -24px rgba(0,0,0,0.65);
   }
   .panel-head { display: flex; align-items: center; gap: 10px; margin-bottom: 16px; }
-  .panel-head .sphere {
-    width: 26px; height: 26px; border-radius: 50%; flex: none;
-    background: radial-gradient(circle at 32% 28%, #bfe3ff, transparent 45%), linear-gradient(135deg, #5cb0ff, #17429a 60%, #0a1a3d);
-  }
+  .panel-head .brand-icon {
+    width: 26px; height: 26px; border-radius: 0; flex: none;
+
+   object-fit: contain;}
   .panel-head span { color: #f1f1f1; font-size: 17px; font-weight: 700; }
   .row { background: #1a2b3a; border: 1px solid #24384a; border-radius: 10px; padding: 12px 14px; margin-bottom: 10px; }
   .row .ts { display: block; font-size: 12px; color: #7fb8f0; font-weight: 700; margin-bottom: 4px; }
@@ -64,7 +64,7 @@
   <div class="cta">⬇ Add to Chrome — it's free</div>
 
   <div class="panel">
-    <div class="panel-head"><span class="sphere"></span><span>Subtitles</span></div>
+    <div class="panel-head"><img class="brand-icon" src="../../extension/icons/source.png" alt=""><span>Subtitles</span></div>
     <div class="row">
       <span class="ts">0:07</span>
       <div class="orig">If you can master the correct mindset,</div>
