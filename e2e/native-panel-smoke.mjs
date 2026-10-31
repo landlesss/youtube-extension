@@ -46,6 +46,10 @@ try {
   const playerButton = youtube.locator('#yt-subs-player-button');
   await playerButton.waitFor();
   assert.equal(await playerButton.count(), 1);
+  const playerImage = playerButton.locator('img');
+  await playerImage.evaluate(image => image.decode());
+  assert.ok((await playerImage.getAttribute('src')).startsWith('data:image/png;'));
+  assert.equal(await playerImage.evaluate(image => image.naturalWidth), 48);
   await playerButton.click();
   for (let i = 0; i < 40 && !(await worker.evaluate(() => globalThis.panelOpened)); i++) await youtube.waitForTimeout(100);
   assert.equal(await worker.evaluate(() => globalThis.panelOpened), true, 'Player button must open native panel with a real user gesture');

@@ -1,3 +1,4 @@
+import playerIcon from "../../icons/icon48.png";
 import { cleanupCues, fetchCaptionTracks, getVideoId } from "../lib/youtube";
 import { fetchCuesFromPanel } from "../lib/transcriptPanel";
 
@@ -76,7 +77,8 @@ function mountPlayerButton(): void {
   button.title = chrome.i18n.getMessage("openSubtitlePanel") || "Open subtitle translator";
   button.setAttribute("aria-label", button.title);
   const icon = document.createElement("img");
-  icon.src = chrome.runtime.getURL("icons/icon48.png");
+  // Embed the approved PNG so page images never request chrome-extension URLs.
+  icon.src = playerIcon;
   icon.alt = "";
   icon.draggable = false;
   icon.style.cssText = "width:24px;height:24px;object-fit:contain;display:block;pointer-events:none";

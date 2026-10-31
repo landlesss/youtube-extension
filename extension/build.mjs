@@ -13,6 +13,7 @@ mkdirSync(outdir, { recursive: true });
 
 const commonOptions = {
   bundle: true,
+  loader: { ".png": "dataurl" },
   sourcemap: true,
   minify: !watch,
   logLevel: "info",
