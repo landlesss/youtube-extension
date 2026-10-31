@@ -37,6 +37,6 @@ assert.equal(options.at(-1).tabId, 2);
 assert.equal(options.at(-1).enabled, false, 'Leaving YouTube disables its panel');
 console.log('Per-tab opening and disabling outside YouTube passed');
 
-assert.ok(new URL(uninstallUrl).pathname.endsWith('/viewform')); // Live fallback until custom page is deployed.
+assert.equal(new URL(uninstallUrl).pathname, '/uninstall/');
 assert.equal(new URL(uninstallUrl).searchParams.get('lang'), 'ru');
 assert.equal(new URL(uninstallUrl).searchParams.get('version'), '0.1.1');

@@ -6,6 +6,5 @@ export const FEEDBACK_FORM_URL =
 
 // Must stay reachable after the extension files have been removed.
 export const UNINSTALL_FEEDBACK_PAGE_URL = "https://downloadsubtitles.online/uninstall/";
-// Switch to UNINSTALL_FEEDBACK_PAGE_URL after docs/uninstall is deployed.
-// The existing Google Form remains reachable for installed builds meanwhile.
-export const UNINSTALL_FEEDBACK_URL = FEEDBACK_FORM_URL;
+// Published uninstall page; answers are delivered through the existing Google Form.
+export const UNINSTALL_FEEDBACK_URL = UNINSTALL_FEEDBACK_PAGE_URL;
