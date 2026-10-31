@@ -15,11 +15,11 @@
     background: radial-gradient(circle, rgba(79,209,197,0.18), transparent 62%);
     top: -140px; right: -120px;
   }
-  .brand-icon {
-    position: absolute; top: 34px; left: 32px; width: 56px; height: 56px; border-radius: 0;
-
+  .sphere {
+    position: absolute; top: 34px; left: 32px; width: 56px; height: 56px; border-radius: 50%;
+    background: radial-gradient(circle at 32% 28%, #bfe3ff, transparent 45%), linear-gradient(135deg, #5cb0ff, #17429a 60%, #0a1a3d);
     box-shadow: 0 10px 26px -6px rgba(23,66,154,0.7);
-   object-fit: contain;}
+  }
   h1 {
     position: absolute; top: 108px; left: 32px; right: 32px;
     font-size: 27px; line-height: 1.18; font-weight: 800; color: #f3f6fa; margin: 0; letter-spacing: -0.01em;
@@ -38,7 +38,7 @@
 <body>
 <div class="stage">
   <div class="glow"></div>
-  <img class="brand-icon" src="../../extension/icons/source.png" alt="">
+  <div class="sphere"></div>
   <div class="pill">60 languages</div>
   <h1>Download &amp; translate YouTube captions.</h1>
   <p>SRT, VTT, TXT — original or bilingual, one click.</p>
