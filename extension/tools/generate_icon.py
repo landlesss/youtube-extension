@@ -8,4 +8,4 @@ with Image.open(source) as image:
     image = image.convert("RGBA")
     for size in (16, 48, 128):
         image.resize((size, size), Image.Resampling.LANCZOS).save(root / "icons" / f"icon{size}.png")
-    image.resize((128, 128), Image.Resampling.LANCZOS).save(root.parent / "docs" / "logo.png")
+    image.save(root.parent / "docs" / "logo.png")
