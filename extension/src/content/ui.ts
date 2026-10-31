@@ -176,7 +176,9 @@ export class SubtitlePanel {
         box-sizing: border-box;
         position: relative;
         width: 100%;
-        min-height: 100vh;
+        height: 100vh;
+        display: flex;
+        flex-direction: column;
         overflow-y: auto;
         background: rgba(12, 15, 21, 0.98);
         color: #f5f7fb;
@@ -189,6 +191,7 @@ export class SubtitlePanel {
         padding: 12px 14px 10px;
         backdrop-filter: blur(8px);
       }
+      .panel > * { flex-shrink: 0; }
       .panel.hidden { display: none; }
       .title-row {
         display: flex;
@@ -325,7 +328,8 @@ export class SubtitlePanel {
       .searchable-select-item:hover { background: #303030; }
       .transcript-list {
         margin-top: 10px;
-        max-height: 220px;
+        flex: 1 1 220px;
+        min-height: 120px;
         overflow-y: auto;
         display: flex;
         flex-direction: column;
@@ -333,6 +337,7 @@ export class SubtitlePanel {
         padding-right: 2px;
       }
       .transcript-row {
+        flex-shrink: 0;
         background: #1a2b3a;
         border: 1px solid #24384a;
         border-radius: 10px;
