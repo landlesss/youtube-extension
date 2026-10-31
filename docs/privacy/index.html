@@ -139,19 +139,19 @@
 
 <main class="page">
   <h1>Privacy Policy</h1>
-  <div class="meta">Last updated: 5 October 2026</div>
+  <div class="meta">Last updated: 1 November 2026</div>
   <p class="lede">Download Subtitles from YouTube is a Chrome extension that downloads, copies, and translates YouTube subtitles. This page explains exactly what data that involves — anonymous sessions, subtitle processing, optional feedback and deletion requests.</p>
 
   <nav class="toc" aria-label="Table of contents">
     <span class="toc-label">Contents</span>
     <ol>
       <li><a href="#overview"><span class="n">01</span> Overview</a></li>
-      <li><a href="#google-data"><span class="n">02</span> Anonymous sessions</a></li>
+      <li><a href="#anonymous-session"><span class="n">02</span> Anonymous sessions</a></li>
       <li><a href="#collect"><span class="n">03</span> What we collect</a></li>
       <li><a href="#not-collect"><span class="n">04</span> What we don't collect</a></li>
       <li><a href="#use"><span class="n">05</span> How we use it</a></li>
       <li><a href="#share"><span class="n">06</span> Who we share it with</a></li>
-      <li><a href="#limited-use"><span class="n">07</span> Account access</a></li>
+      <li><a href="#feedback"><span class="n">07</span> Feedback</a></li>
       <li><a href="#retention"><span class="n">08</span> Retention</a></li>
       <li><a href="#security"><span class="n">09</span> Security</a></li>
       <li><a href="#choices"><span class="n">10</span> Your choices &amp; deletion</a></li>
@@ -164,10 +164,10 @@
   <section id="overview">
     <div class="eyebrow">01</div>
     <h2>Overview</h2>
-    <p>Download Subtitles from YouTube ("the extension", "we") lets you download, copy, and translate subtitles from YouTube videos. Subtitle extraction happens locally in your browser: the extension reads the captions shown on the YouTube page you have open. Anonymous sessions and translation involve our backend service at <strong>api.downloadsubtitles.online</strong> ("the service"). This policy covers both the extension and the service, and the website at downloadsubtitles.online.</p>
+    <p>Download Subtitles from YouTube ("the extension", "we") lets you download, copy, and translate subtitles from YouTube videos. Subtitles are retrieved from YouTube in your browser. If direct requests fail, a temporary hidden YouTube document may load the transcript; it is removed after loading, failure, timeout or a video change. This can make additional requests to YouTube using your existing browser session. Anonymous sessions and translation involve our backend service at <strong>api.downloadsubtitles.online</strong> ("the service"). This policy covers both the extension and the service, and the website at downloadsubtitles.online.</p>
   </section>
 
-  <section id="google-data">
+  <section id="anonymous-session">
     <div class="eyebrow">02</div>
     <h2>Anonymous sessions</h2>
     <p>The current extension works without Google sign-in. Our service creates an anonymous session for this browser installation. Its JWT and rotating refresh secret are stored in <code>chrome.storage.local</code> and used to apply usage limits. The extension no longer requests Google OAuth permissions or links Google accounts.</p>
@@ -179,11 +179,11 @@
     <h2>What we collect</h2>
     <p>Only what's needed to run the features you actually use:</p>
     <dl class="field-list">
-      <dt>Account</dt><dd>An anonymous server-issued identity for this browser installation.</dd>
+      <dt>Installation identity</dt><dd>An anonymous server-issued identity for this browser installation.</dd>
       <dt>Subtitle text</dt><dd>The caption lines of a video, sent to our service only when you use the Translate feature.</dd>
       <dt>Video ID</dt><dd>The YouTube video's ID, sent when you download, copy, or translate — used to enforce the daily free-plan limit per video.</dd>
-      <dt>Usage</dt><dd>Download and translation counts and character usage tied to your account, for plan limits.</dd>
-      <dt>Local prefs</dt><dd>Your session JWT, rotating refresh secret and a one-time "rate us" flag, stored only in your browser via <code>chrome.storage.local</code>.</dd>
+      <dt>Usage</dt><dd>Download and translation counts and character usage associated with the anonymous installation identity, for plan limits.</dd>
+      <dt>Local prefs</dt><dd>Your session JWT, rotating refresh secret and a one-time "rate us" flag, saved in your browser via <code>chrome.storage.local</code>.</dd>
     </dl>
     <p>Downloading or copying subtitles <strong>without</strong> translation does not send the subtitle text itself to our service — it's extracted and written to a file entirely on your device. The anonymous session enforces the daily video limit without a sign-in step.</p>
   </section>
@@ -214,41 +214,43 @@
   <section id="share">
     <div class="eyebrow">06</div>
     <h2>Who we share it with</h2>
-    <p>A short, fixed list — no data brokers, no ad exchanges:</p>
+    <p>The services involved in these features include:</p>
     <ul>
-      <li><strong>Our translation provider (an LLM-based translation service)</strong> — receives only the subtitle text you ask to translate and the language codes, solely to return a translation. It never receives your Google email address or account ID</li>
-      <li><strong>Our hosting and infrastructure providers</strong> — run the servers our service operates on, under standard confidentiality terms</li>
+      <li><strong>Our translation provider (an LLM-based translation service)</strong> — receives only the subtitle text you ask to translate and the language codes, solely to return a translation. The current extension does not request your Google email address or Google account ID</li>
+      <li><strong>Our hosting and infrastructure providers</strong> — deliver the website and operate the API</li>
     </ul>
     <p>We may disclose information if required by law, or to protect the security of the service against abuse.</p>
     <div class="callout">If you rate the extension 4–5 stars, we open the Chrome Web Store review page. If you rate it 1–3 stars, we open a Google Form instead, so we can follow up on feedback privately rather than it becoming a public review. Either way this is a link you choose to click — we don't submit anything on your behalf. If you fill out the feedback form, we can see what you submit there; the form is hosted and operated by Google under <a href="https://policies.google.com/privacy" target="_blank" rel="noopener noreferrer">Google's own privacy policy</a>.</div>
   </section>
 
-  <section id="limited-use">
+  <section id="feedback">
     <div class="eyebrow">07</div>
-    <h2>Account access</h2>
-    <p>The current extension does not use Google OAuth, request Google account permissions or offer account linking. Optional feedback is collected through Google Forms; the selected reason, comment and optional reply email are sent only when you submit the form.</p>
+    <h2>Optional feedback</h2>
+    <p>The current extension does not use Google OAuth or offer account linking. Feedback is collected through Google Forms, either directly or through our website form. The selected reason, optional comment, optional reply email and extension version are sent when you submit. Google handles the form submission under its own privacy policy. Providing feedback does not reactivate the extension or create a Google-linked extension account.</p>
   </section>
 
   <section id="retention">
     <div class="eyebrow">08</div>
     <h2>Retention</h2>
-    <p>We keep your account data for as long as your account is active. If you ask us to delete your account (see <a href="#contact">Contact</a>), we delete your account record and stop retaining new usage data. Subtitle text sent for translation is processed to return a result and is not kept longer than necessary to do that and to prevent abuse of the service.</p>
+    <p>Session credentials are stored locally until they are replaced, cleared or removed with the extension. The service issues a JWT valid for 30 days and a rotating guest secret valid for 180 days after its last refresh. These credential lifetimes do not mean that server records are automatically deleted on those dates.</p>
+    <p>Server-side usage records are used to enforce quotas and operate the service. Translation requests may be processed or cached by the service and its translation provider. Removing the extension does not automatically delete server-side usage records, translation records or feedback already submitted. Contact us to request deletion and information about the records that can be associated with your installation.</p>
   </section>
 
   <section id="security">
     <div class="eyebrow">09</div>
     <h2>Security</h2>
-    <p>All traffic between the extension and our service is encrypted in transit (HTTPS). Access to account data is limited to what's needed to operate the service. No method of transmission or storage is 100% secure, and we can't guarantee absolute security — but we take reasonable precautions.</p>
+    <p>All traffic between the extension and our service is encrypted in transit (HTTPS). Access to service data is limited to what's needed to operate the service. No method of transmission or storage is 100% secure, and we can't guarantee absolute security — but we take reasonable precautions.</p>
   </section>
 
   <section id="choices">
     <div class="eyebrow">10</div>
     <h2>Your choices &amp; deletion</h2>
     <ul>
-      <li><strong>Sign out</strong> any time from the extension panel — this clears your local session</li>
-      <li><strong>Revoke access</strong> from your <a href="https://myaccount.google.com/permissions" target="_blank" rel="noopener noreferrer">Google Account permissions page</a> at any time</li>
-      <li><strong>Delete your data</strong> by emailing us at the address below from the Google account you signed in with — we'll remove your account record</li>
-      <li><strong>Uninstall</strong> the extension at any time from <code>chrome://extensions</code>, which also clears all local data it stored</li>
+      <li><strong>Choose whether to translate.</strong> Viewing, copying and downloading original subtitles does not send their text to our API. Translation sends the selected subtitle text and language codes to the service.</li>
+      <li><strong>Skip feedback.</strong> Feedback is optional. A reason, comment and reply email are submitted only when you press Send. Opening the uninstall page does not submit an answer; its address includes the interface language and extension version.</li>
+      <li><strong>Remove local data.</strong> Uninstall the extension or clear its extension storage. Saved subtitle files remain wherever you downloaded them. Removing local credentials does not erase server records or submitted feedback.</li>
+      <li><strong>Request deletion.</strong> Email the contact address below. No Google login is required. Because the session is anonymous, we may need additional information to locate the relevant records. Do not email JWTs, guest secrets or passwords.</li>
+      <li><strong>Previous Google users.</strong> The current version does not offer Google sign-in or account linking. If you previously used Google sign-in, you can request deletion of those older account records using the contact address below.</li>
     </ul>
   </section>
 
