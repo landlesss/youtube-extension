@@ -172,11 +172,14 @@ export class SubtitlePanel {
   private styleEl(): HTMLStyleElement {
     const style = document.createElement("style");
     style.textContent = `
+      :host { display: flex; flex-direction: column; height: 100vh; overflow: hidden; }
       .panel {
         box-sizing: border-box;
         position: relative;
         width: 100%;
-        height: 100vh;
+        height: auto;
+        flex: 1 1 auto;
+        min-height: 0;
         display: flex;
         flex-direction: column;
         overflow-y: auto;
@@ -367,24 +370,25 @@ export class SubtitlePanel {
         border-top: 1px dashed #2a3450;
       }
       .review-toast {
-        position: fixed;
-        bottom: 24px;
-        right: 24px;
-        width: 360px;
-        max-width: calc(100vw - 32px);
+        position: relative;
+        box-sizing: border-box;
+        flex: 0 0 auto;
+        margin: 10px;
+        width: calc(100% - 20px);
+        min-width: 0;
         background: #14202e;
         color: #f1f1f1;
         border: 2px solid #4fd1c5;
         border-radius: 16px;
-        padding: 24px 52px 24px 24px;
-        font-size: 20px;
+        padding: 14px 42px 14px 14px;
+        font-size: 14px;
         font-weight: 700;
         line-height: 1.3;
-        box-shadow: 0 12px 48px rgba(0,0,0,0.65), 0 0 0 6px rgba(79,209,197,0.18);
+        box-shadow: 0 12px 48px rgba(0,0,0,0.65), 0 0 0 2px rgba(79,209,197,0.12);
         z-index: 2147483647;
         display: flex;
         flex-direction: column;
-        gap: 16px;
+        gap: 10px;
         animation: yt-subs-toast-in 0.35s ease-out;
       }
       @keyframes yt-subs-toast-in {
@@ -394,7 +398,7 @@ export class SubtitlePanel {
       @media (prefers-reduced-motion: reduce) {
         .review-toast { animation: none; }
       }
-      .star-row { display: flex; gap: 6px; }
+      .star-row { display: flex; gap: 2px; width: 100%; }
       .star-btn {
         width: auto;
         margin: 0;
@@ -402,15 +406,17 @@ export class SubtitlePanel {
         background: transparent;
         border: none;
         color: #5b6b80;
-        font-size: 44px;
+        flex: 1 1 0;
+        min-width: 0;
+        font-size: 30px;
         line-height: 1;
         cursor: pointer;
       }
       .star-btn.lit { color: #f5c518; }
       .review-toast-close {
         position: absolute;
-        top: 12px;
-        right: 14px;
+        top: 8px;
+        right: 8px;
         width: auto;
         margin: 0;
         padding: 4px 8px;
